@@ -15,8 +15,19 @@ let argv = yargs(helpers.hideBin(process.argv))
     .help()
     .parseSync()
 
-let pid = argv._[0]
+import express = require('express')
+const app = express()
+const port = 3000
 
+app.get('/api/samples/cpu', (req, res) => {
+    res.send(SampleStorage.SAMPLES_CPU)
+})
+
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
+
+let pid = argv._[0]
 setInterval(() => {
     pidusage(pid, { "usePs": true }, (err, stats: pidusage.Status) => {
         if (err) {
