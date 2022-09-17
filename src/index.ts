@@ -14,12 +14,16 @@ let argv = yargs(helpers.hideBin(process.argv))
     .help()
     .parseSync()
 
-console.dir(argv._)
-pidusage(argv._[0], { "usePs": true }, (err, stats: pidusage.Status) => {
-    if (err) {
-        console.warn("Error:", err.message)
-        return
-    }
+let pid = argv._[0]
 
-    console.log("Stats:", stats.cpu)
-})
+setInterval(() => {
+    pidusage(pid, { "usePs": true }, (err, stats: pidusage.Status) => {
+        if (err) {
+            console.warn("Error:", err.message)
+            return
+        }
+
+        console.log("Stats:", stats.cpu, stats.memory)
+        pidusage.clear()
+    })
+}, 1000)
