@@ -19,6 +19,8 @@
     "typescript": "^4.8.3"
   },
   "dependencies": {
-    "express": "^4.18.1"
+    "@types/pidusage": "^2.0.2",
+    "express": "^4.18.1",
+    "pidusage": "^3.0.0"
   }
 }
