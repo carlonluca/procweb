@@ -1,0 +1,9 @@
+stages:
+  - build
+
+Build:
+  image: node:16-apline
+  stage: build
+  script:
+    - npm i
+    - npm run build
