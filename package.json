@@ -23,6 +23,7 @@
   "dependencies": {
     "@types/pidusage": "^2.0.2",
     "express": "^4.18.1",
+    "node-sysconf": "^2.0.4",
     "pidusage": "^3.0.0",
     "yargs": "^17.5.1"
   }

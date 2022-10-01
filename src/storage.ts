@@ -5,12 +5,12 @@ export class Sample {
     /**
      * Creates a new sample.
      * 
-     * @param timestamp 
+     * @param ts
      * @param value 
      */
     constructor(
-        public timestamp: number,
-        public value: number
+        public ts: number,
+        public cpu: number
     ) {}
 
     /**
@@ -28,6 +28,5 @@ export class Sample {
  * Handles the storage.
  */
 export class SampleStorage {
-    static SAMPLES_CPU: Sample[] = []
-    static SAMPLES_MEM: Sample[] = []
+    static SAMPLES: Sample[] = []
 }

@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { EChartsOption } from 'echarts';
+import { Component } from '@angular/core'
+import { HttpClient } from '@angular/common/http'
+import { EChartsOption } from 'echarts'
 import { XAXisComponentOption } from "echarts"
 
 interface Sample {
-    timestamp: number,
-    value: number
+    ts: number,
+    cpu: number
 }
 
 @Component({
@@ -17,6 +17,7 @@ export class AppComponent {
     constructor(private http: HttpClient) { }
     title = 'procweb-webui'
     echartData: number[][] = []
+    theme = 'dark'
     chartOption: EChartsOption = {
         xAxis: {
             type: 'value',
@@ -55,12 +56,12 @@ export class AppComponent {
     ngOnInit() {
         this.getSamples().subscribe((data: Sample[]) => {
             data.forEach((sample: Sample) => {
-                this.echartData.push([sample.timestamp, sample.value])
+                this.echartData.push([sample.ts, sample.cpu*100])
             })
             let xMin: number = this.arrayMinTimestamp(data);
             let xMax: number = this.arrayMaxTimestamp(data);
-            let yMin: number = this.arrayMinValue(data);
-            let yMax: number = this.arrayMaxValue(data);
+            let yMin: number = 0;
+            let yMax: number = 100;
             (this.chartOption.xAxis! as XAXisComponentOption).min = xMin;
             (this.chartOption.xAxis! as XAXisComponentOption).max = xMax;
             (this.chartOption.yAxis! as XAXisComponentOption).min = yMin;
@@ -69,30 +70,30 @@ export class AppComponent {
     }
 
     getSamples() {
-        return this.http.get<Sample[]>("/api/samples/cpu")
+        return this.http.get<Sample[]>("/api/samples")
     }
 
     arrayMinTimestamp(arr: Sample[]): number {
         return arr.reduce((p: Sample, v: Sample) => {
-            return p.timestamp < v.timestamp ? p : v
-        }).timestamp
+            return p.ts < v.ts ? p : v
+        }).ts
     }
 
     arrayMaxTimestamp(arr: Sample[]): number {
         return arr.reduce((p, v): Sample => {
-            return p.timestamp > v.timestamp ? p : v
-        }).timestamp
+            return p.ts > v.ts ? p : v
+        }).ts
     }
 
     arrayMinValue(arr: Sample[]): number {
         return arr.reduce((p, v): Sample => {
-            return p.value < v.value ? p : v
-        }).value
+            return p.cpu < v.cpu ? p : v
+        }).cpu*100
     }
 
     arrayMaxValue(arr: Sample[]): number {
         return arr.reduce((p, v): Sample => {
-            return p.value > v.value ? p : v
-        }).value
+            return p.cpu > v.cpu ? p : v
+        }).cpu*100
     }
 }

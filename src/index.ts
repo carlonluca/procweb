@@ -1,6 +1,7 @@
-import pidusage = require("pidusage")
 import yargs = require("yargs")
-import helpers = require('yargs/helpers')
+import helpers = require("yargs/helpers")
+import express = require('express')
+import fs = require("fs")
 import { Sample, SampleStorage } from "./storage"
 
 let argv = yargs(helpers.hideBin(process.argv))
@@ -15,12 +16,11 @@ let argv = yargs(helpers.hideBin(process.argv))
     .help()
     .parseSync()
 
-import express = require('express')
 const app = express()
 const port = 3000
 
-app.get('/api/samples/cpu', (req, res) => {
-    res.send(SampleStorage.SAMPLES_CPU)
+app.get('/api/samples', (req, res) => {
+    res.send(SampleStorage.SAMPLES)
 })
 
 app.listen(port, () => {
@@ -28,20 +28,43 @@ app.listen(port, () => {
 })
 
 let pid = argv._[0]
+let lastCpuTime: number = -1
+let lastProcCpuTime: number = -1
+
 setInterval(() => {
-    pidusage(pid, { "usePs": true }, (err, stats: pidusage.Status) => {
+    fs.readFile("/proc/" + pid + "/stat", "utf8", (err, data) => {
         if (err) {
-            console.warn("Error:", err.message)
+            console.warn("Failed to read prc stat. Process not running?")
             return
         }
 
-        console.log("Stats:", stats.cpu, stats.memory)
+        const values: string[] = data.split(" ")
+        const procUtime = +values[13]
+        const procStime = +values[14]
+        const procStartTime = +values[21]
+        const procUsageTicks = procUtime + procStime
+        fs.readFile("/proc/stat", "utf8", (err, cpuData) => {
+            const cpuValues: string[] = cpuData.split("\n")[0].split(" ")
+            let cpuTime = 0
+            for (let i = 1; i < cpuValues.length; i++) {
+                cpuTime += +cpuValues[i]
+            }
 
-        let cpuSample = Sample.takeSample(stats.cpu)
-        let memSample = Sample.takeSample(stats.memory)
-        SampleStorage.SAMPLES_CPU.push(cpuSample)
-        SampleStorage.SAMPLES_MEM.push(memSample)
+            if (lastCpuTime < 0 || lastProcCpuTime < 0) {
+                lastCpuTime = cpuTime
+                lastProcCpuTime = procUsageTicks
+                return
+            }
 
-        pidusage.clear()
+            let cpu = (cpuTime - lastCpuTime === 0) ? 0 : (procUsageTicks - lastProcCpuTime)/(cpuTime - lastCpuTime)
+            let cpuSample = Sample.takeSample(cpu)
+            SampleStorage.SAMPLES.push(cpuSample)
+
+            console.log("Sample:", cpuSample)
+            console.log("---")
+
+            lastProcCpuTime = procUsageTicks
+            lastCpuTime = cpuTime
+        })
     })
 }, 1000)
