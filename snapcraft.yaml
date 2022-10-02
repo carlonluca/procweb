@@ -1,6 +1,7 @@
 name: procweb
 version: git
 summary: Command line monitoring tool
+description: Command line monitoring tool
 
 confinement: devmode
 base: core22
