@@ -15,3 +15,9 @@ parts:
     plugin: npm
     npm-node-version: 16.16.0
     source: .
+    build-packages:
+      - npm
+    stage-packages:
+      - libc6
+      - libgcc1
+      - libstdc++6
