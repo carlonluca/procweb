@@ -17,6 +17,7 @@ parts:
     source: .
     build-packages:
       - npm
+      - cargo
     stage-packages:
       - libc6
       - libgcc1
