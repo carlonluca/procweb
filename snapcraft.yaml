@@ -14,7 +14,13 @@ parts:
   procweb:
     plugin: npm
     npm-node-version: 16.16.0
+    npm-include-node: true
     source: .
+    override-build: |
+      npm install typescript -g
+      npm i
+      npm run build
+      npm pack
     build-packages:
       - npm
       - cargo
