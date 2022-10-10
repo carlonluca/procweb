@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="index.html">../procweb-webui/dist/procweb-webui/index.html</file>
+        <file alias="main.js">../procweb-webui/dist/procweb-webui/main.js</file>
+        <file alias="polyfills.js">../procweb-webui/dist/procweb-webui/polyfills.js</file>
+        <file alias="runtime.js">../procweb-webui/dist/procweb-webui/runtime.js</file>
+        <file alias="styles.css">../procweb-webui/dist/procweb-webui/styles.css</file>
+        <file alias="45.js">../procweb-webui/dist/procweb-webui/45.js</file>
+    </qresource>
+</RCC>
