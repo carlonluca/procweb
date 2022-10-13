@@ -1,0 +1,9 @@
+[submodule "procweb-qt/3rdparty/lqtutils"]
+	path = procweb-qt/3rdparty/lqtutils
+	url = https://github.com/carlonluca/lqtutils.git
+[submodule "procweb-qt/procweb-qt/3rdparty/lqobjectserializer"]
+	path = procweb-qt/procweb-qt/3rdparty/lqobjectserializer
+	url = https://github.com/carlonluca/lqobjectserializer.git
+[submodule "procweb-qt/3rdparty/lqobjectserializer"]
+	path = procweb-qt/3rdparty/lqobjectserializer
+	url = https://github.com/carlonluca/lqobjectserializer.git
