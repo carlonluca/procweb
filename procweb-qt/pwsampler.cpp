@@ -13,9 +13,13 @@ PWSampler::PWSampler(int pid, QObject* parent) :
   , m_lastProcCpuTime(0)
   , m_lastCpuTime(0)
 {
+    connect(this, &PWSampler::sampleIntervalChanged, this, [this] {
+        m_samplerTimer->setInterval(m_sampleInterval);
+    });
+
     connect(m_samplerTimer, &QTimer::timeout,
             this, &PWSampler::acquireSample);
-    m_samplerTimer->setInterval(1000);
+    m_samplerTimer->setInterval(sampleInterval());
     m_samplerTimer->setSingleShot(false);
     m_samplerTimer->start();
 }

@@ -2,8 +2,16 @@ stages:
   - build
 
 Build:
-  image: node:16-alpine
+  image:
+    name: gitlab.pihome.lan:5050/opensource/procweb/builder:latest
+    entrypoint: [""]
   stage: build
   script:
-    - npm i
-    - npm run build
+    - cd procweb-webui
+    - ./build.sh
+    - cd ..
+    - cd procweb-qt
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make

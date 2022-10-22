@@ -4,11 +4,14 @@
 #include <QObject>
 #include <QTimer>
 
+#include <lqtutils_prop.h>
+
 #include "pwdata.h"
 
 class PWSampler : public QObject
 {
     Q_OBJECT
+    L_RW_PROP_AS(qint64, sampleInterval, 1000)
 public:
     explicit PWSampler(int pid, QObject* parent = nullptr);
 

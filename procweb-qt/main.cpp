@@ -25,6 +25,16 @@ int main(int argc, char** argv)
                                    QJsonDocument(response).toJson(QJsonDocument::Compact),
                                    QHttpServerResponse::StatusCode::Ok);
     });
+    httpServer.route("/api/setup", [&sampler] (const QUrl& url) {
+        PWSetup setup;
+        setup.set_sampleInterval(sampler.sampleInterval());
+        LSerializer s;
+        QJsonObject json = s.serialize<PWSetup>(&setup);
+
+        return QHttpServerResponse(QByteArray("application/json"),
+                                   QJsonDocument(json).toJson(QJsonDocument::Compact),
+                                   QHttpServerResponse::StatusCode::Ok);
+    });
     httpServer.route("/<arg>", [] (const QUrl& url) {
         QString fileName = url.path().isEmpty() ? QStringLiteral("index.html") : url.path();
         qDebug() << "File name:" << fileName;

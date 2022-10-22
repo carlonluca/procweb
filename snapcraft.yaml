@@ -8,23 +8,18 @@ base: core22
 
 apps:
   procweb:
-    command: bin/procweb
+    command: /usr/bin/
 
 parts:
-  procweb:
-    plugin: npm
-    npm-node-version: 16.16.0
-    npm-include-node: true
-    source: .
+  qt:
+    plugin: dump
+    source: ""
+    override-pull: |
+      git clone git://code.qt.io/qt/qt5.git qt6
+      cd qt6
+      perl init-repository
     override-build: |
-      npm install typescript -g
-      npm i
-      npm run build
-      npm pack
-    build-packages:
-      - npm
-      - cargo
-    stage-packages:
-      - libc6
-      - libgcc1
-      - libstdc++6
+      cd qtbase
+      ./configure --prefix /usr/Qt-amd64-6.4.0 --skip qtwebengine --skip qtdeclarative
+      make -j20
+      make install

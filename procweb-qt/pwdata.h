@@ -9,6 +9,10 @@
 
 Q_NAMESPACE
 
+L_BEGIN_CLASS(PWSetup)
+L_RW_PROP_AS(qint64, sampleInterval, 1000)
+L_END_CLASS
+
 L_BEGIN_CLASS(PWSample)
 L_RW_PROP_AS(qint64, ts, 0)
 L_RW_PROP_AS(double, cpu, 0)

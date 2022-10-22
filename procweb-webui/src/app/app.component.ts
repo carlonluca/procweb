@@ -2,10 +2,15 @@ import { Component } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { EChartsOption } from 'echarts'
 import { XAXisComponentOption } from "echarts"
+import { interval, Observable } from 'rxjs';
 
 interface Sample {
     ts: number,
     cpu: number
+}
+
+interface Setup {
+    sampleInterval: number
 }
 
 @Component({
@@ -48,15 +53,17 @@ export class AppComponent {
         series: [
             {
                 type: "line",
-                data: this.echartData
+                data: this.echartData,
+                showSymbol: false
             }
         ]
     }
+    dynamicData: EChartsOption = {}
 
     ngOnInit() {
         this.getSamples().subscribe((data: Sample[]) => {
             data.forEach((sample: Sample) => {
-                this.echartData.push([sample.ts, sample.cpu*100])
+                this.echartData.push([sample.ts, sample.cpu * 100])
             })
             let xMin: number = this.arrayMinTimestamp(data);
             let xMax: number = this.arrayMaxTimestamp(data);
@@ -67,10 +74,39 @@ export class AppComponent {
             (this.chartOption.yAxis! as XAXisComponentOption).min = yMin;
             (this.chartOption.yAxis! as XAXisComponentOption).max = yMax;
         })
+        interval(1000).subscribe((val) => {
+            this.getSamples().subscribe((data: Sample[]) => {
+                let echartData: number[][] = []
+                data.forEach((sample: Sample) => {
+                    echartData.push([sample.ts, sample.cpu * 100])
+                })
+                this.dynamicData = {
+                    series: [
+                        {
+                            type: "line",
+                            data: echartData,
+                            showSymbol: false
+                        }
+                    ],
+                    xAxis: {
+                        min: this.arrayMinTimestamp(data),
+                        max: this.arrayMaxTimestamp(data)
+                    },
+                    yAxis: {
+                        min: 0,
+                        max: 100
+                    }
+                }
+            })
+        })
     }
 
     getSamples() {
         return this.http.get<Sample[]>("/api/samples")
+    }
+
+    getSetup() {
+        return this.http.get<Setup>("/api/setup")
     }
 
     arrayMinTimestamp(arr: Sample[]): number {
@@ -88,12 +124,12 @@ export class AppComponent {
     arrayMinValue(arr: Sample[]): number {
         return arr.reduce((p, v): Sample => {
             return p.cpu < v.cpu ? p : v
-        }).cpu*100
+        }).cpu * 100
     }
 
     arrayMaxValue(arr: Sample[]): number {
         return arr.reduce((p, v): Sample => {
             return p.cpu > v.cpu ? p : v
-        }).cpu*100
+        }).cpu * 100
     }
 }
