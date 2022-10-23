@@ -16,5 +16,5 @@ Build:
     - cd procweb-qt
     - mkdir build
     - cd build
-    - cmake ..
+    - /opt/Qt-arm64-6.4.0/bin/qt-cmake ..
     - make
