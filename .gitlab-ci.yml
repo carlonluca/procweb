@@ -1,6 +1,9 @@
 stages:
   - build
 
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
 Build:
   image:
     name: gitlab.pihome.lan:5050/opensource/procweb/builder:latest
