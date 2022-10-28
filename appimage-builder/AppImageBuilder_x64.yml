@@ -1,0 +1,84 @@
+# appimage-builder recipe see https://appimage-builder.readthedocs.io for details
+version: 1
+AppDir:
+  path: /root/procweb/procweb-qt/build/AppDir
+  app_info:
+    id: procweb
+    name: procweb
+    icon: test.png
+    version: 1.0.0
+    exec: usr/bin/procweb-qt
+    exec_args: $@
+  apt:
+    arch: []
+    allow_unauthenticated: true
+    sources:
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main
+        restricted
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates
+        main restricted
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates
+        main restricted
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy universe
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy universe
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates
+        universe
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates
+        universe
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy multiverse
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy multiverse
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates
+        multiverse
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates
+        multiverse
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-backports
+        main restricted universe multiverse
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-backports
+        main restricted universe multiverse
+    - sourceline: deb [arch=amd64] http://security.ubuntu.com/ubuntu/ jammy-security
+        main restricted
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security
+        main restricted
+    - sourceline: deb [arch=amd64] http://security.ubuntu.com/ubuntu/ jammy-security
+        universe
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security
+        universe
+    - sourceline: deb [arch=amd64] http://security.ubuntu.com/ubuntu/ jammy-security
+        multiverse
+    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security
+        multiverse
+    - sourceline: deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x
+        jammy main
+    include:
+    - libc-bin
+    - openssl
+  files:
+    include:
+    - /opt/Qt-amd64-6.4.0/plugins/tls/libqcertonlybackend.so
+    - /opt/Qt-amd64-6.4.0/plugins/tls/libqopensslbackend.so
+    exclude:
+    - usr/share/man
+    - usr/share/doc/*/README.*
+    - usr/share/doc/*/changelog.*
+    - usr/share/doc/*/NEWS.*
+    - usr/share/doc/*/TODO.*
+  test:
+    fedora-30:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun
+    debian-stable:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun
+    archlinux-latest:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun
+    centos-7:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun
+    ubuntu-xenial:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun
+AppImage:
+  arch: x86_64
+  update-information: guess
