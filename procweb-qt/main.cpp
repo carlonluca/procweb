@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 {
     QCoreApplication a(argc, argv);
 
-    PWSampler sampler(a.arguments()[1].toInt());
+    PWSampler sampler(qEnvironmentVariableIsSet("PROCWEB_APPIMAGE_BUILDER_TEST") ? 0 : a.arguments()[1].toInt());
     QHttpServer httpServer;
     httpServer.route("/api/samples", [&sampler] (const QUrl& url) {
         QList<PWSampleRef> samples = sampler.samples();

@@ -21,7 +21,11 @@ PWSampler::PWSampler(int pid, QObject* parent) :
             this, &PWSampler::acquireSample);
     m_samplerTimer->setInterval(sampleInterval());
     m_samplerTimer->setSingleShot(false);
-    m_samplerTimer->start();
+
+    if (qEnvironmentVariableIsSet("PROCWEB_APPIMAGE_BUILDER_TEST"))
+        QTimer::singleShot(5000, this, [] { qApp->exit(0); });
+    else
+        m_samplerTimer->start();
 }
 
 void PWSampler::acquireSample()

@@ -16,5 +16,7 @@ Build:
     - cd procweb-qt
     - mkdir build
     - cd build
-    - /opt/Qt-arm64-6.4.0/bin/qt-cmake ..
+    - /opt/Qt-arm64-6.4.0/bin/qt-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
     - make
+    - make install DESTDIR=AppDir
+    - export LD_LIBRARY_PATH=/opt/Qt-amd64-6.4.0/lib/
