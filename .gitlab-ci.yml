@@ -9,6 +9,9 @@ Build:
     name: gitlab.pihome.lan:5050/opensource/procweb/builder:latest
     entrypoint: [""]
   stage: build
+  artifacts:
+    paths:
+      - procweb-qt/build/procweb-1.0.0-aarch64.AppImage
   script:
     - cd procweb-webui
     - ./build.sh
