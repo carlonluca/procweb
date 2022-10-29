@@ -2,6 +2,9 @@
 version: 1
 AppDir:
   path: /root/procweb/procweb-qt/build/AppDir
+  runtime:
+    env:
+      QT_PLUGIN_PATH: '${APPDIR}/opt/Qt-amd64-6.4.0/plugins'
   app_info:
     id: procweb
     name: procweb
@@ -10,7 +13,7 @@ AppDir:
     exec: usr/bin/procweb-qt
     exec_args: $@
   apt:
-    arch: []
+    arch: [amd64]
     allow_unauthenticated: true
     sources:
     - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted
