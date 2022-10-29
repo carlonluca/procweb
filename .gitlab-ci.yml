@@ -19,4 +19,6 @@ Build:
     - /opt/Qt-arm64-6.4.0/bin/qt-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
     - make
     - make install DESTDIR=AppDir
-    - export LD_LIBRARY_PATH=/opt/Qt-amd64-6.4.0/lib/
+    - mkdir -p AppDir/usr/share/icons
+    - touch AppDir/usr/share/icons/test.png
+    - appimage-builder --recipe ../../appimage-builder/AppImageBuilder_aarch64.yml
