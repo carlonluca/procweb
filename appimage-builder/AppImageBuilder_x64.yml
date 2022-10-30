@@ -30,6 +30,8 @@ AppDir:
     include:
     - libc-bin
     - openssl
+    - libssl
+    - libcrypto
   files:
     include:
     - /opt/Qt-amd64-6.4.0/lib/libQt6HttpServer.so.6
