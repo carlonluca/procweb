@@ -17,47 +17,22 @@ AppDir:
     allow_unauthenticated: true
     sources:
     - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main
-        restricted
-    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates
-        main restricted
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates
-        main restricted
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted
     - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy universe
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy universe
-    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates
-        universe
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates
-        universe
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates universe
     - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy multiverse
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy multiverse
-    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates
-        multiverse
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates
-        multiverse
-    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-backports
-        main restricted universe multiverse
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-backports
-        main restricted universe multiverse
-    - sourceline: deb [arch=amd64] http://security.ubuntu.com/ubuntu/ jammy-security
-        main restricted
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security
-        main restricted
-    - sourceline: deb [arch=amd64] http://security.ubuntu.com/ubuntu/ jammy-security
-        universe
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security
-        universe
-    - sourceline: deb [arch=amd64] http://security.ubuntu.com/ubuntu/ jammy-security
-        multiverse
-    - sourceline: deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security
-        multiverse
-    - sourceline: deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x
-        jammy main
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates multiverse
+    - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse
+    - sourceline: deb [arch=amd64] http://security.ubuntu.com/ubuntu/ jammy-security main restricted
+    - sourceline: deb [arch=amd64] http://security.ubuntu.com/ubuntu/ jammy-security universe
+    - sourceline: deb [arch=amd64] http://security.ubuntu.com/ubuntu/ jammy-security multiverse
+    - sourceline: deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x jammy main
     include:
     - libc-bin
     - openssl
   files:
     include:
+    - /opt/Qt-amd64-6.4.0/lib/libQt6HttpServer.so.6
     - /opt/Qt-amd64-6.4.0/plugins/tls/libqcertonlybackend.so
     - /opt/Qt-amd64-6.4.0/plugins/tls/libqopensslbackend.so
     exclude:
