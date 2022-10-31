@@ -5,6 +5,7 @@ AppDir:
   runtime:
     env:
       QT_PLUGIN_PATH: '${APPDIR}/opt/Qt-amd64-6.4.0/plugins'
+      APPDIR_LIBRARY_PATH: '$APPDIR/lib/x86_64-linux-gnu:$APPDIR/usr/lib/x86_64-linux-gnu:$APPDIR/opt/Qt-amd64-6.4.0/lib'
   app_info:
     id: procweb
     name: procweb
@@ -31,6 +32,9 @@ AppDir:
     - libc-bin
     - openssl
     - libssl3
+    - libgcc-s1
+    - libpcre3
+    - zlib1g
   files:
     include:
     - /opt/Qt-amd64-6.4.0/lib/libQt6HttpServer.so.6
