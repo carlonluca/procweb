@@ -5,6 +5,7 @@ AppDir:
   runtime:
     env:
       QT_PLUGIN_PATH: '${APPDIR}/opt/Qt-arm64-6.4.0/plugins'
+      APPDIR_LIBRARY_PATH: '$APPDIR/lib/aarch64-linux-gnu:$APPDIR/usr/lib/aarch64-linux-gnu:$APPDIR/opt/Qt-arm64-6.4.0/lib'
   app_info:
     id: procweb
     name: procweb
@@ -30,7 +31,7 @@ AppDir:
     include:
     - libc-bin
     - libgcc-s1
-    - libpcre2-32-0
+    - libpcre2-16-0
     - libb2-1
     - zlib1g
   files:
