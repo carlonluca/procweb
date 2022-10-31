@@ -31,7 +31,8 @@ AppDir:
     include:
     - libc-bin
     - libgcc-s1
-    - libpcre3
+    - libpcre2-32-0
+    - libb2-1
     - zlib1g
   files:
     include:
