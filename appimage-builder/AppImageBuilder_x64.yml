@@ -30,13 +30,13 @@ AppDir:
     - sourceline: deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_16.x jammy main
     include:
     - libc-bin
-    - openssl
-    - libssl3
     - libgcc-s1
     - libpcre3
     - zlib1g
   files:
     include:
+    - /lib/x86_64-linux-gnu/libcrypto.so
+    - /lib/x86_64-linux-gnu/libssl.so
     - /opt/Qt-amd64-6.4.0/lib/libQt6HttpServer.so.6
     - /opt/Qt-amd64-6.4.0/plugins/tls/libqcertonlybackend.so
     - /opt/Qt-amd64-6.4.0/plugins/tls/libqopensslbackend.so
