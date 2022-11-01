@@ -53,9 +53,9 @@ void PWSampler::acquireSample()
     }
 
     const QStringList procStatValues = procStatContent.split(' ', Qt::KeepEmptyParts);
-    const quint64 procUtime = lqt_string_to_uint64(procStatValues[13], -1);
-    const quint64 procStime = lqt_string_to_uint64(procStatValues[14], -1);
-    const quint64 procStartTime = lqt_string_to_uint64(procStatValues[21], -1);
+    const quint64 procUtime = lqt::string_to_uint64(procStatValues[13], -1);
+    const quint64 procStime = lqt::string_to_uint64(procStatValues[14], -1);
+    const quint64 procStartTime = lqt::string_to_uint64(procStatValues[21], -1);
     if (procUtime == -1 || procStime == -1 || procStartTime == -1) {
         qWarning() << "Failed to parse proc stats";
         return;
@@ -95,7 +95,7 @@ void PWSampler::acquireSample()
 
     quint64 cpuTime = 0;
     for (const QString& statValue : statValues)
-        cpuTime += lqt_string_to_int64(statValue, 0);
+        cpuTime += lqt::string_to_uint64(statValue, 0);
 
     if (m_lastCpuTime < 0 || m_lastProcCpuTime < 0) {
         m_lastCpuTime = cpuTime;
