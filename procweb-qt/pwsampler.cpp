@@ -4,6 +4,8 @@
 
 #include <lqtutils_string.h>
 
+#include <unistd.h>
+
 #include "pwsampler.h"
 
 PWSampler::PWSampler(int pid, QObject* parent) :
@@ -30,6 +32,7 @@ PWSampler::PWSampler(int pid, QObject* parent) :
 
 void PWSampler::acquireSample()
 {
+    // CPU
     const QString procStatPath = QString("/proc/%1/stat").arg(m_pid);
     QFile procStatFile(procStatPath);
     if (!procStatFile.exists()) {
@@ -50,15 +53,15 @@ void PWSampler::acquireSample()
     }
 
     const QStringList procStatValues = procStatContent.split(' ', Qt::KeepEmptyParts);
-    const qint64 procUtime = string_to_int64(procStatValues[13], -1);
-    const qint64 procStime = string_to_int64(procStatValues[14], -1);
-    const qint64 procStartTime = string_to_int64(procStatValues[21], -1);
+    const quint64 procUtime = lqt_string_to_uint64(procStatValues[13], -1);
+    const quint64 procStime = lqt_string_to_uint64(procStatValues[14], -1);
+    const quint64 procStartTime = lqt_string_to_uint64(procStatValues[21], -1);
     if (procUtime == -1 || procStime == -1 || procStartTime == -1) {
         qWarning() << "Failed to parse proc stats";
         return;
     }
 
-    const qint64 procUsageTicks = procUtime + procStime;
+    const quint64 procUsageTicks = procUtime + procStime;
 
     const QString statPath = QSL("/proc/stat");
     QFile statFile(statPath);
@@ -90,9 +93,9 @@ void PWSampler::acquireSample()
         return;
     }
 
-    qint64 cpuTime = 0;
+    quint64 cpuTime = 0;
     for (const QString& statValue : statValues)
-        cpuTime += string_to_int64(statValue, 0);
+        cpuTime += lqt_string_to_int64(statValue, 0);
 
     if (m_lastCpuTime < 0 || m_lastProcCpuTime < 0) {
         m_lastCpuTime = cpuTime;
@@ -101,9 +104,18 @@ void PWSampler::acquireSample()
     }
 
     double cpu = (cpuTime - m_lastCpuTime == 0) ? 0 : (procUsageTicks - m_lastProcCpuTime)/static_cast<double>(cpuTime - m_lastCpuTime);
+
+    // RSS
+    quint64 rss = 0;
+    if (procStatValues.size() > 23) {
+        const int pageSize = getpagesize();
+        rss = procStatValues.at(23).toULongLong()*pageSize;
+    }
+
     PWSampleRef sample(new PWSample);
     sample->set_cpu(cpu);
     sample->set_ts(QDateTime::currentMSecsSinceEpoch());
+    sample->set_rssSize(rss);
     m_samples.append(sample);
 
     qDebug() << "Sample acquired:" << sample;

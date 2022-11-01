@@ -16,10 +16,20 @@ L_END_CLASS
 L_BEGIN_CLASS(PWSample)
 L_RW_PROP_AS(qint64, ts, 0)
 L_RW_PROP_AS(double, cpu, 0)
+L_RW_PROP_AS(double, vmPeak, 0)
+L_RW_PROP_AS(double, vmSize, 0)
+L_RW_PROP_AS(double, rssPeak, 0)
+L_RW_PROP_AS(double, rssSize, 0)
 L_END_CLASS
 typedef QSharedPointer<PWSample> PWSampleRef;
 
 inline QDebug& operator<<(QDebug& dbg, const PWSampleRef& sample)
-{ return dbg << QString("{ %1, %2 }").arg(sample->ts()).arg(sample->cpu()); }
+{
+    dbg << QString("{\n");
+    dbg << QString("\t%1\n").arg(sample->ts());
+    dbg << QString("\t%2\n").arg(sample->cpu());
+    dbg << QString("\t%3\n").arg(QString::number(sample->rssSize(), 'f'));
+    return dbg << QString("}");
+}
 
 #endif // PWDATA_H
