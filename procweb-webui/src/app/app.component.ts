@@ -66,21 +66,29 @@ export class AppComponent {
             })
 
             this.dynamicData = {
-                series: [
-                    {
+                series: [{
                         type: "line",
                         data: cpuData,
-                        showSymbol: false
+                        showSymbol: false,
+                        yAxisIndex: 0
+                    }, {
+                        type: "line",
+                        data: memData,
+                        showSymbol: false,
+                        yAxisIndex: 1
                     }
                 ],
                 xAxis: {
                     min: this.arrayMinTimestamp(data),
                     max: this.arrayMaxTimestamp(data)
                 },
-                yAxis: {
+                yAxis: [{
                     min: 0,
                     max: 100
-                }
+                }, {
+                    min: 0,
+                    max: 1E9
+                }]
             }
         })
     }
