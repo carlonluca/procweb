@@ -6,7 +6,8 @@ import { interval, Observable } from 'rxjs';
 
 interface Sample {
     ts: number,
-    cpu: number
+    cpu: number,
+    rssSize: number
 }
 
 interface Setup {
@@ -44,60 +45,43 @@ export class AppComponent {
                     return new Date(value).toLocaleString(undefined, options)
                 }
             }
-        },
-        yAxis: {
-            type: 'value',
-            min: 0,
-            max: 100
-        },
-        series: [
-            {
-                type: "line",
-                data: this.echartData,
-                showSymbol: false
-            }
-        ]
+        }
     }
     dynamicData: EChartsOption = {}
 
     ngOnInit() {
-        this.getSamples().subscribe((data: Sample[]) => {
-            data.forEach((sample: Sample) => {
-                this.echartData.push([sample.ts, sample.cpu * 100])
-            })
-            let xMin: number = this.arrayMinTimestamp(data);
-            let xMax: number = this.arrayMaxTimestamp(data);
-            let yMin: number = 0;
-            let yMax: number = 100;
-            (this.chartOption.xAxis! as XAXisComponentOption).min = xMin;
-            (this.chartOption.xAxis! as XAXisComponentOption).max = xMax;
-            (this.chartOption.yAxis! as XAXisComponentOption).min = yMin;
-            (this.chartOption.yAxis! as XAXisComponentOption).max = yMax;
+        this.refresh()
+        interval(1000).subscribe((_) => {
+            this.refresh()
         })
-        interval(1000).subscribe((val) => {
-            this.getSamples().subscribe((data: Sample[]) => {
-                let echartData: number[][] = []
-                data.forEach((sample: Sample) => {
-                    echartData.push([sample.ts, sample.cpu * 100])
-                })
-                this.dynamicData = {
-                    series: [
-                        {
-                            type: "line",
-                            data: echartData,
-                            showSymbol: false
-                        }
-                    ],
-                    xAxis: {
-                        min: this.arrayMinTimestamp(data),
-                        max: this.arrayMaxTimestamp(data)
-                    },
-                    yAxis: {
-                        min: 0,
-                        max: 100
-                    }
-                }
+    }
+
+    refresh() {
+        this.getSamples().subscribe((data: Sample[]) => {
+            let cpuData: number[][] = []
+            let memData: number[][] = []
+            data.forEach((sample: Sample) => {
+                cpuData.push([sample.ts, sample.cpu * 100])
+                memData.push([sample.ts, sample.rssSize])
             })
+
+            this.dynamicData = {
+                series: [
+                    {
+                        type: "line",
+                        data: cpuData,
+                        showSymbol: false
+                    }
+                ],
+                xAxis: {
+                    min: this.arrayMinTimestamp(data),
+                    max: this.arrayMaxTimestamp(data)
+                },
+                yAxis: {
+                    min: 0,
+                    max: 100
+                }
+            }
         })
     }
 
