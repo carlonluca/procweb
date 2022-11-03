@@ -14,13 +14,16 @@ interface Setup {
     sampleInterval: number
 }
 
+class TimeUom {
+    constructor(public display: string, public value: string) {}
+}
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-    constructor(private http: HttpClient) { }
     title = 'procweb-webui'
     echartData: number[][] = []
     theme = 'dark'
@@ -48,6 +51,19 @@ export class AppComponent {
         }
     }
     dynamicData: EChartsOption = {}
+
+    // Time range
+    timeUoms: TimeUom[] = [
+        new TimeUom("minute(s)", "minutes"),
+        new TimeUom("hour(s)", "hours"),
+        new TimeUom("day(s)", "days"),
+        new TimeUom("month(s)", "months"),
+        new TimeUom("year(s)", "years")
+    ]
+    selectedUom: TimeUom = this.timeUoms[1]
+    selectedValue: number = 1
+
+    constructor(private http: HttpClient) { }
 
     ngOnInit() {
         this.refresh()
@@ -79,7 +95,7 @@ export class AppComponent {
                     }
                 ],
                 xAxis: {
-                    min: this.arrayMinTimestamp(data),
+                    min: this.arrayMaxTimestamp(data),
                     max: this.arrayMaxTimestamp(data)
                 },
                 yAxis: [{
@@ -123,5 +139,9 @@ export class AppComponent {
         return arr.reduce((p, v): Sample => {
             return p.cpu > v.cpu ? p : v
         }).cpu * 100
+    }
+
+    onChange() {
+
     }
 }

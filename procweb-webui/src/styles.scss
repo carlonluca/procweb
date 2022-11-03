@@ -5,3 +5,17 @@ body {
 h1 {
     color: #e9b311;
 }
+
+.center-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inline-comp {
+    margin-left: 1em;
+}
+
+.align-right {
+    text-align: right;
+}

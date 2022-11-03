@@ -1,3 +1,12 @@
 <h1>procweb-webui</h1>
 <br/><br/>
 <div echarts [options]="chartOption" [merge]="dynamicData" class="demo-chart"></div>
+<div class="center-container">
+    <p>X axis range:</p>
+    <input class="inline-comp align-right" type="number" min="0" value="1" [(ngModel)]="selectedValue"/>
+    <select class="inline-comp" [(ngModel)]="selectedUom" onchange="uomChanged()">
+        <option *ngFor="let timeUom of timeUoms" [ngValue]="timeUom">
+            {{ timeUom.display }}
+        </option>
+    </select>
+</div>
