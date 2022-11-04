@@ -20,6 +20,7 @@ L_RW_PROP_AS(double, vmPeak, 0)
 L_RW_PROP_AS(double, vmSize, 0)
 L_RW_PROP_AS(double, rssPeak, 0)
 L_RW_PROP_AS(double, rssSize, 0)
+L_RW_PROP_AS(double, ramSize, 0)
 L_END_CLASS
 typedef QSharedPointer<PWSample> PWSampleRef;
 

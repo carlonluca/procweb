@@ -5,6 +5,7 @@
 #include <lqtutils_string.h>
 
 #include <unistd.h>
+#include <sys/sysinfo.h>
 
 #include "pwsampler.h"
 
@@ -112,15 +113,30 @@ void PWSampler::acquireSample()
         rss = procStatValues.at(23).toULongLong()*pageSize;
     }
 
+    // Total mem
+    std::optional<quint64> totalMem = readTotalMem();
+
     PWSampleRef sample(new PWSample);
     sample->set_cpu(cpu);
     sample->set_ts(QDateTime::currentMSecsSinceEpoch());
     sample->set_rssSize(rss);
+    if (totalMem)
+        sample->set_ramSize(*totalMem);
     m_samples.append(sample);
-
-    qDebug() << "Sample acquired:" << sample;
-    qDebug() << "----";
 
     m_lastCpuTime = cpuTime;
     m_lastProcCpuTime = procUsageTicks;
+}
+
+std::optional<quint64> PWSampler::readTotalMem()
+{
+    struct sysinfo info;
+    if (sysinfo(&info) != 0) {
+        qWarning() << "sysinfo returned error:" << strerror(errno);
+        return std::nullopt;
+    }
+
+    quint32 memunit = info.mem_unit;
+    quint64 total = info.totalram;
+    return total*memunit;
 }

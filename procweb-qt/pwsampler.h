@@ -21,6 +21,9 @@ private slots:
     void acquireSample();
 
 private:
+    std::optional<quint64> readTotalMem();
+
+private:
     QList<PWSampleRef> m_samples;
     QTimer* m_samplerTimer;
     int m_pid;

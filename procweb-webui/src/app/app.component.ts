@@ -7,7 +7,8 @@ import { interval, Observable } from 'rxjs';
 interface Sample {
     ts: number,
     cpu: number,
-    rssSize: number
+    rssSize: number,
+    ramSize: number
 }
 
 interface Setup {
@@ -95,7 +96,7 @@ export class AppComponent {
                     }
                 ],
                 xAxis: {
-                    min: this.arrayMaxTimestamp(data),
+                    min: this.arrayMinTimestamp(data),
                     max: this.arrayMaxTimestamp(data)
                 },
                 yAxis: [{
@@ -103,7 +104,7 @@ export class AppComponent {
                     max: 100
                 }, {
                     min: 0,
-                    max: 1E9
+                    max: data[0].ramSize
                 }]
             }
         })
