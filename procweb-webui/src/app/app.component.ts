@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http'
 import { EChartsOption } from 'echarts'
 import { XAXisComponentOption } from "echarts"
 import { interval, Observable } from 'rxjs';
+import prettyBytes from 'pretty-bytes';
 
 interface Sample {
     ts: number,
@@ -101,10 +102,20 @@ export class AppComponent {
                 },
                 yAxis: [{
                     min: 0,
-                    max: 100
+                    max: 100,
+                    axisLabel: {
+                        formatter: (value: number, index: number): string => {
+                            return value + "%"
+                        }
+                    }
                 }, {
                     min: 0,
-                    max: data[0].ramSize
+                    max: data[0].ramSize,
+                    axisLabel: {
+                        formatter: (value: number, index: number): string => {
+                            return prettyBytes(value)
+                        }
+                    }
                 }]
             }
         })
