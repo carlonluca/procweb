@@ -1,24 +1,8 @@
 import { Component } from '@angular/core'
-import { HttpClient } from '@angular/common/http'
 import { EChartsOption } from 'echarts'
-import { XAXisComponentOption } from "echarts"
-import { interval, Observable } from 'rxjs';
-import prettyBytes from 'pretty-bytes';
-
-interface Sample {
-    ts: number,
-    cpu: number,
-    rssSize: number,
-    ramSize: number
-}
-
-interface Setup {
-    sampleInterval: number
-}
-
-class TimeUom {
-    constructor(public display: string, public value: string) {}
-}
+import { interval, Observable } from 'rxjs'
+import prettyBytes from 'pretty-bytes'
+import { Sample, SamplesService, TimeUom } from './samples.service'
 
 @Component({
     selector: 'app-root',
@@ -65,7 +49,7 @@ export class AppComponent {
     selectedUom: TimeUom = this.timeUoms[1]
     selectedValue: number = 1
 
-    constructor(private http: HttpClient) { }
+    constructor(private sampleService: SamplesService) { }
 
     ngOnInit() {
         this.refresh()
@@ -75,7 +59,7 @@ export class AppComponent {
     }
 
     refresh() {
-        this.getSamples().subscribe((data: Sample[]) => {
+        this.sampleService.getSamples().subscribe((data: Sample[]) => {
             let cpuData: number[][] = []
             let memData: number[][] = []
             data.forEach((sample: Sample) => {
@@ -119,14 +103,6 @@ export class AppComponent {
                 }]
             }
         })
-    }
-
-    getSamples() {
-        return this.http.get<Sample[]>("/api/samples")
-    }
-
-    getSetup() {
-        return this.http.get<Setup>("/api/setup")
     }
 
     arrayMinTimestamp(arr: Sample[]): number {
