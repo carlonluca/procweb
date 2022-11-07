@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { interval, Observable, Observer, shareReplay } from 'rxjs';
 
 export interface Sample {
     ts: number,
@@ -20,13 +21,28 @@ export class TimeUom {
     providedIn: 'root'
 })
 export class SamplesService {
-    constructor(private http: HttpClient) { }
+    samples: Observable<Sample[]>
 
-    getSamples() {
-        return this.http.get<Sample[]>("/api/samples")
+    constructor(private http: HttpClient) {
+        this.samples = new Observable<Sample[]>((observer) => {
+            shareReplay(1)
+            this.refreshSamples(observer)
+        })
     }
 
     getSetup() {
         return this.http.get<Setup>("/api/setup")
+    }
+
+    private getSamples() {
+        return this.http.get<Sample[]>("/api/samples")
+    }
+
+    private refreshSamples(observer: Observer<Sample[]>) {
+        interval(1000).subscribe((_) => {
+            this.getSamples().subscribe((data: Sample[]) => {
+                observer.next(data)
+            })
+        })
     }
 }

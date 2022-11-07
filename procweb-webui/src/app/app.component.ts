@@ -52,14 +52,7 @@ export class AppComponent {
     constructor(private sampleService: SamplesService) { }
 
     ngOnInit() {
-        this.refresh()
-        interval(1000).subscribe((_) => {
-            this.refresh()
-        })
-    }
-
-    refresh() {
-        this.sampleService.getSamples().subscribe((data: Sample[]) => {
+        this.sampleService.samples.subscribe((data: Sample[]) => {
             let cpuData: number[][] = []
             let memData: number[][] = []
             data.forEach((sample: Sample) => {
