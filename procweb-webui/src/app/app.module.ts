@@ -1,10 +1,12 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { NgxEchartsModule } from 'ngx-echarts';
+import { NgModule } from '@angular/core'
+import { BrowserModule } from '@angular/platform-browser'
+import { AppRoutingModule } from './app-routing.module'
+import { AppComponent } from './app.component'
+import { HttpClientModule } from '@angular/common/http'
+import { FormsModule } from '@angular/forms'
+import { NgxEchartsModule } from 'ngx-echarts'
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
+import { MatSelectModule } from '@angular/material/select'
 
 @NgModule({
    declarations: [
@@ -15,6 +17,7 @@ import { NgxEchartsModule } from 'ngx-echarts';
       AppRoutingModule,
       HttpClientModule,
       FormsModule,
+      MatSelectModule,
       NgxEchartsModule.forRoot({
          /**
           * This will import all modules from echarts.
@@ -22,7 +25,8 @@ import { NgxEchartsModule } from 'ngx-echarts';
           * please refer to [Custom Build] section.
           */
          echarts: () => import('echarts'), // or import('./path-to-my-custom-echarts')
-      })
+      }),
+      BrowserAnimationsModule
    ],
    providers: [],
    bootstrap: [AppComponent]
