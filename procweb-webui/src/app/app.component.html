@@ -2,13 +2,11 @@
 <br /><br />
 <div echarts [options]="chartOption" [merge]="dynamicData" class="demo-chart"></div>
 <div class="center-container">
-    <p>X axis range:</p>
-    <input matInput class="inline-comp align-right" type="number" min="0" value="1" [(ngModel)]="selectedValue" />
-    <!--<select class="inline-comp" [(ngModel)]="selectedUom" onchange="uomChanged()">
-        <option *ngFor="let timeUom of timeUoms" [ngValue]="timeUom">
-            {{ timeUom.display }}
-        </option>
-    </select>-->
+    <mat-label>X axis range:</mat-label>
+    <mat-form-field class="inline-comp" appearance="fill">
+        <mat-label>Input</mat-label>
+        <input matInput class="align-right" type="number" min="0" value="1" [(ngModel)]="selectedValue">
+    </mat-form-field>
     <mat-form-field class="inline-comp" appearance="fill">
         <mat-label>Unit of measure</mat-label>
         <mat-select [(ngModel)]="selectedUom">

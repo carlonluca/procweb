@@ -7,6 +7,8 @@ import { FormsModule } from '@angular/forms'
 import { NgxEchartsModule } from 'ngx-echarts'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { MatSelectModule } from '@angular/material/select'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
 
 @NgModule({
    declarations: [
@@ -18,6 +20,8 @@ import { MatSelectModule } from '@angular/material/select'
       HttpClientModule,
       FormsModule,
       MatSelectModule,
+      MatFormFieldModule,
+      MatInputModule,
       NgxEchartsModule.forRoot({
          /**
           * This will import all modules from echarts.
