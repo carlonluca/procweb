@@ -14,7 +14,7 @@ export interface Setup {
 }
 
 export class TimeUom {
-    constructor(public display: string, public value: string) {}
+    constructor(public display: string, public value: string, public secs: number) {}
 }
 
 @Injectable({

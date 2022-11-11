@@ -5,11 +5,11 @@
     <mat-label>X axis range:</mat-label>
     <mat-form-field class="inline-comp" appearance="fill">
         <mat-label>Input</mat-label>
-        <input matInput class="align-right" type="number" min="0" value="1" [(ngModel)]="selectedValue">
+        <input matInput class="align-right" type="number" min="0" value="1" [(ngModel)]="selectedValue" (change)="onChange()">
     </mat-form-field>
     <mat-form-field class="inline-comp" appearance="fill">
         <mat-label>Unit of measure</mat-label>
-        <mat-select [(ngModel)]="selectedUom">
+        <mat-select [(ngModel)]="selectedUom" (selectionChange)="onChange()">
             <mat-option *ngFor="let timeUom of timeUoms" [value]="timeUom">
                 {{ timeUom.display }}
             </mat-option>

@@ -2,6 +2,7 @@ import { Component } from '@angular/core'
 import { EChartsOption } from 'echarts'
 import { interval, Observable } from 'rxjs'
 import prettyBytes from 'pretty-bytes'
+import { HumanizeDurationLanguage, HumanizeDuration } from 'humanize-duration-ts';
 import { Sample, SamplesService, TimeUom } from './samples.service'
 
 @Component({
@@ -40,11 +41,11 @@ export class AppComponent {
 
     // Time range
     timeUoms: TimeUom[] = [
-        new TimeUom("minute(s)", "minutes"),
-        new TimeUom("hour(s)", "hours"),
-        new TimeUom("day(s)", "days"),
-        new TimeUom("month(s)", "months"),
-        new TimeUom("year(s)", "years")
+        new TimeUom("minute(s)", "minutes", 60),
+        new TimeUom("hour(s)", "hours", 60*60),
+        new TimeUom("day(s)", "days", 24*60*60),
+        new TimeUom("month(s)", "months", 30*24*60*60),
+        new TimeUom("year(s)", "years", 12*30*24*60*60)
     ]
     selectedUom: TimeUom = this.timeUoms[1]
     selectedValue: number = 1
@@ -75,7 +76,10 @@ export class AppComponent {
                 ],
                 xAxis: {
                     min: this.arrayMinTimestamp(data),
-                    max: this.arrayMaxTimestamp(data)
+                    max: this.arrayMaxTimestamp(data),
+                    axisLabel: {
+                        color: "white"
+                    }
                 },
                 yAxis: [{
                     min: 0,
@@ -83,7 +87,8 @@ export class AppComponent {
                     axisLabel: {
                         formatter: (value: number, index: number): string => {
                             return value + "%"
-                        }
+                        },
+                        color: "white"
                     }
                 }, {
                     min: 0,
@@ -91,7 +96,8 @@ export class AppComponent {
                     axisLabel: {
                         formatter: (value: number, index: number): string => {
                             return prettyBytes(value)
-                        }
+                        },
+                        color: "white"
                     }
                 }]
             }
@@ -123,6 +129,8 @@ export class AppComponent {
     }
 
     onChange() {
-
+        let langService = new HumanizeDurationLanguage()
+        let humanizer = new HumanizeDuration(langService)
+        console.log("Value:", humanizer.humanize(this.selectedValue*this.selectedUom.secs*1000))
     }
 }
