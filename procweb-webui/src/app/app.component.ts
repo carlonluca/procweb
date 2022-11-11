@@ -75,7 +75,7 @@ export class AppComponent {
                     }
                 ],
                 xAxis: {
-                    min: this.arrayMinTimestamp(data),
+                    min: this.arrayMaxTimestamp(data) - this.selectedValue*this.selectedUom.secs*1000,
                     max: this.arrayMaxTimestamp(data),
                     axisLabel: {
                         color: "white"
