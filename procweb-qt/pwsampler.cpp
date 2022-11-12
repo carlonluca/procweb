@@ -8,6 +8,7 @@
 #include <sys/sysinfo.h>
 
 #include "pwsampler.h"
+#include "pwreader.h"
 
 PWSampler::PWSampler(int pid, QObject* parent) :
     QObject{parent}
@@ -34,7 +35,7 @@ PWSampler::PWSampler(int pid, QObject* parent) :
 void PWSampler::acquireSample()
 {
     // CPU
-    const QString procStatPath = QString("/proc/%1/stat").arg(m_pid);
+    const QString procStatPath = PWReader::procStatDir(m_pid);
     QFile procStatFile(procStatPath);
     if (!procStatFile.exists()) {
         qCritical() << "Process cannot be found:" << m_pid;

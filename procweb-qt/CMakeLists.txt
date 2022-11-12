@@ -23,6 +23,7 @@ add_executable(procweb-qt
     pwdata.h pwdata.cpp
     pwstorage.h pwstorage.cpp
     pwsampler.h pwsampler.cpp
+    pwreader.h pwreader.cpp
 )
 target_link_libraries(procweb-qt
     Qt${QT_VERSION_MAJOR}::Core

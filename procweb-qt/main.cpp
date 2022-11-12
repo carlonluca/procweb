@@ -7,6 +7,7 @@
 
 #include "pwsampler.h"
 #include "pwdata.h"
+#include "pwreader.h"
 
 int main(int argc, char** argv)
 {
@@ -33,9 +34,11 @@ int main(int argc, char** argv)
                                    QJsonDocument(response).toJson(QJsonDocument::Compact),
                                    QHttpServerResponse::StatusCode::Ok);
     });
-    httpServer.route("/api/setup", [&sampler] (const QUrl& url) {
+    httpServer.route("/api/setup", [&sampler, &pid] (const QUrl& url) {
         PWSetup setup;
         setup.set_sampleInterval(sampler.sampleInterval());
+        setup.set_pid(pid);
+        setup.set_cmdline(PWReader::readCmdline(pid));
         LSerializer s;
         QJsonObject json = s.serialize<PWSetup>(&setup);
 

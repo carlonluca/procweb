@@ -4,13 +4,16 @@ import { interval, Observable, Observer, shareReplay } from 'rxjs';
 
 export interface Sample {
     ts: number,
+    pid: number,
     cpu: number,
     rssSize: number,
     ramSize: number
 }
 
 export interface Setup {
-    sampleInterval: number
+    sampleInterval: number,
+    pid: number,
+    cmdline: string
 }
 
 export class TimeUom {
@@ -22,16 +25,32 @@ export class TimeUom {
 })
 export class SamplesService {
     samples: Observable<Sample[]>
+    setup: Observable<Setup>
 
     constructor(private http: HttpClient) {
         this.samples = new Observable<Sample[]>((observer) => {
             shareReplay(1)
+            this.getSamples().subscribe((data: Sample[]) => observer.next(data))
             this.refreshSamples(observer)
+        })
+
+        this.setup = new Observable<Setup>((observer) => {
+            shareReplay(1)
+            this.getSetup().subscribe((data: Setup) => observer.next(data))
+            this.refreshSetup(observer)
         })
     }
 
-    getSetup() {
+    private getSetup() {
         return this.http.get<Setup>("/api/setup")
+    }
+
+    private refreshSetup(observer: Observer<Setup>) {
+        interval(10000).subscribe((_) => {
+            this.getSetup().subscribe((data: Setup) => {
+                observer.next(data)
+            })
+        })
     }
 
     private getSamples() {

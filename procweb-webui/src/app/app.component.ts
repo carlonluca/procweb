@@ -3,7 +3,13 @@ import { EChartsOption } from 'echarts'
 import { interval, Observable } from 'rxjs'
 import prettyBytes from 'pretty-bytes'
 import { HumanizeDurationLanguage, HumanizeDuration } from 'humanize-duration-ts';
-import { Sample, SamplesService, TimeUom } from './samples.service'
+import { Setup, Sample, SamplesService, TimeUom } from './samples.service'
+
+class DisplayRow {
+    constructor(
+        public description: string,
+        public value: string) {}
+}
 
 @Component({
     selector: 'app-root',
@@ -49,12 +55,26 @@ export class AppComponent {
     ]
     selectedUom: TimeUom = this.timeUoms[1]
     selectedValue: number = 1
+    procData: string = "-"
     sampledTime: string = "-"
+    sampleTable: DisplayRow[] = []
+    sampleTableTime: string = "-"
+    sampleLast?: Sample = undefined
+    displayedColumns: string[] = ['description', 'value']
 
     constructor(private sampleService: SamplesService) { }
 
     ngOnInit() {
+        this.sampleService.setup.subscribe((data: Setup) => {
+            if (!data)
+                return
+            this.procData = data.pid + " - " + data.cmdline
+        })
+
         this.sampleService.samples.subscribe((data: Sample[]) => {
+            if (!data || data.length <= 0)
+                return
+
             let cpuData: number[][] = []
             let memData: number[][] = []
             data.forEach((sample: Sample) => {
@@ -62,12 +82,9 @@ export class AppComponent {
                 memData.push([sample.ts, sample.rssSize])
             })
 
-            let max = cpuData.reduce((a: number[], b: number[]) => a[0] > b[0] ? a : b)
-            let min = cpuData.reduce((a: number[], b: number[]) => a[0] < b[0] ? a : b)
-            let langService = new HumanizeDurationLanguage()
-            let humanizer = new HumanizeDuration(langService)
-            //console.log("Value:", humanizer.humanize(this.selectedValue*this.selectedUom.secs*1000))
-            this.sampledTime = humanizer.humanize(max[0] - min[0])
+            this.sampleLast = data[data.length - 1]
+            this.computeSamplingTime(data)
+            this.computeSampleTable(data[data.length - 1])
 
             this.dynamicData = {
                 series: [{
@@ -136,9 +153,24 @@ export class AppComponent {
         }).cpu * 100
     }
 
-    onChange() {
+    computeSamplingTime(data: Sample[]) {
+        let max = data.reduce((a: Sample, b: Sample) => a.ts > b.ts ? a : b)
+        let min = data.reduce((a: Sample, b: Sample) => a.ts < b.ts ? a : b)
         let langService = new HumanizeDurationLanguage()
         let humanizer = new HumanizeDuration(langService)
-        console.log("Value:", humanizer.humanize(this.selectedValue*this.selectedUom.secs*1000))
+
+        this.sampledTime = humanizer.humanize(max.ts - min.ts)
     }
+
+    computeSampleTable(sample: Sample) {
+        let rows: DisplayRow[] = []
+        rows.push(new DisplayRow("CPU usage", (sample.cpu*100).toFixed(2) + "%"))
+        rows.push(new DisplayRow("Resident Set Size", prettyBytes(sample.rssSize)))
+        rows.push(new DisplayRow("Total main memory", prettyBytes(sample.ramSize)))
+
+        this.sampleTable = rows
+        this.sampleTableTime = new Date(sample.ts).toString()
+    }
+
+    onChange() {}
 }
