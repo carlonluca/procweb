@@ -49,6 +49,7 @@ export class AppComponent {
     ]
     selectedUom: TimeUom = this.timeUoms[1]
     selectedValue: number = 1
+    sampledTime: string = "-"
 
     constructor(private sampleService: SamplesService) { }
 
@@ -60,6 +61,13 @@ export class AppComponent {
                 cpuData.push([sample.ts, sample.cpu * 100])
                 memData.push([sample.ts, sample.rssSize])
             })
+
+            let max = cpuData.reduce((a: number[], b: number[]) => a[0] > b[0] ? a : b)
+            let min = cpuData.reduce((a: number[], b: number[]) => a[0] < b[0] ? a : b)
+            let langService = new HumanizeDurationLanguage()
+            let humanizer = new HumanizeDuration(langService)
+            //console.log("Value:", humanizer.humanize(this.selectedValue*this.selectedUom.secs*1000))
+            this.sampledTime = humanizer.humanize(max[0] - min[0])
 
             this.dynamicData = {
                 series: [{
