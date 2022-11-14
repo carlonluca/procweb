@@ -117,10 +117,28 @@ void PWSampler::acquireSample()
     // Total mem
     std::optional<quint64> totalMem = readTotalMem();
 
+    // Num threads
+    int numThreads = 0;
+    if (procStatValues.size() > 19)
+        numThreads = lqt::string_to_int(procStatValues[19], 0);
+
+    // Niceness
+    int niceness = 0;
+    if (procStatValues.size() > 18)
+        niceness = lqt::string_to_int(procStatValues[18], 0);
+
+    // State
+    QString state;
+    if (procStatValues.size() > 3)
+        state = procStatValues[2];
+
     PWSampleRef sample(new PWSample);
     sample->set_cpu(cpu);
     sample->set_ts(QDateTime::currentMSecsSinceEpoch());
     sample->set_rssSize(rss);
+    sample->set_numThreads(numThreads);
+    sample->set_nice(niceness);
+    sample->set_state(state);
     if (totalMem)
         sample->set_ramSize(*totalMem);
     m_samples.append(sample);

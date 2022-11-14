@@ -7,7 +7,10 @@ export interface Sample {
     pid: number,
     cpu: number,
     rssSize: number,
-    ramSize: number
+    ramSize: number,
+    numThreads: number,
+    nice: number,
+    state: string
 }
 
 export interface Setup {

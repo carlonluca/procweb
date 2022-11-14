@@ -8,7 +8,8 @@ import { Setup, Sample, SamplesService, TimeUom } from './samples.service'
 class DisplayRow {
     constructor(
         public description: string,
-        public value: string) {}
+        public value: string,
+        public icon: string) {}
 }
 
 @Component({
@@ -164,12 +165,30 @@ export class AppComponent {
 
     computeSampleTable(sample: Sample) {
         let rows: DisplayRow[] = []
-        rows.push(new DisplayRow("CPU usage", (sample.cpu*100).toFixed(2) + "%"))
-        rows.push(new DisplayRow("Resident Set Size", prettyBytes(sample.rssSize)))
-        rows.push(new DisplayRow("Total main memory", prettyBytes(sample.ramSize)))
+        rows.push(new DisplayRow("State", this.computeStateValue(sample.state), "fa-face-sleeping"))
+        rows.push(new DisplayRow("CPU usage", (sample.cpu*100).toFixed(2) + "%", ""))
+        rows.push(new DisplayRow("Resident Set Size", prettyBytes(sample.rssSize), ""))
+        rows.push(new DisplayRow("Total main memory", prettyBytes(sample.ramSize), ""))
+        rows.push(new DisplayRow("Niceness", "" + sample.nice, ""));
+        rows.push(new DisplayRow("Number of threads", "" + sample.numThreads, ""))
 
         this.sampleTable = rows
         this.sampleTableTime = new Date(sample.ts).toString()
+    }
+
+    computeStateValue(state: string): string {
+        switch (state) {
+            case "S":
+                return "Sleeping in an interruptible wait (S)"
+            case "R":
+                return "Running (R)"
+            case "D":
+                return "Waiting in uninterruptible disk sleep (D)"
+            case "Z":
+                return "Zombie (Z)"
+        }
+
+        return state
     }
 
     onChange() {}
