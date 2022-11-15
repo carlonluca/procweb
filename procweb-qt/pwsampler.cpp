@@ -108,29 +108,40 @@ void PWSampler::acquireSample()
     double cpu = (cpuTime - m_lastCpuTime == 0) ? 0 : (procUsageTicks - m_lastProcCpuTime)/static_cast<double>(cpuTime - m_lastCpuTime);
 
     // RSS
-    quint64 rss = 0;
+    qint64 rss = 0;
     if (procStatValues.size() > 23) {
         const int pageSize = getpagesize();
         rss = procStatValues.at(23).toULongLong()*pageSize;
     }
 
     // Total mem
-    std::optional<quint64> totalMem = readTotalMem();
+    std::optional<qint64> totalMem = readTotalMem();
 
     // Num threads
-    int numThreads = 0;
+    qint64 numThreads = 0;
     if (procStatValues.size() > 19)
-        numThreads = lqt::string_to_int(procStatValues[19], 0);
+        numThreads = lqt::string_to_int64(procStatValues[19], 0);
 
     // Niceness
-    int niceness = 0;
+    qint64 niceness = 0;
     if (procStatValues.size() > 18)
-        niceness = lqt::string_to_int(procStatValues[18], 0);
+        niceness = lqt::string_to_int64(procStatValues[18], 0);
 
     // State
     QString state;
-    if (procStatValues.size() > 3)
+    if (procStatValues.size() > 2)
         state = procStatValues[2];
+
+    // Virtual size
+    qint64 vsize = 0;
+    if (procStatValues.size() > 22)
+        vsize = lqt::string_to_int64(procStatValues[22], 0);
+
+    // Start
+    qint64 startTime = 0;
+    if (procStatValues.size() > 21)
+        if (long int clockTick = sysconf(_SC_CLK_TCK))
+            startTime = qRound64(lqt::string_to_uint64(procStatValues[21], 0)/static_cast<double>(clockTick))*1000;
 
     PWSampleRef sample(new PWSample);
     sample->set_cpu(cpu);
@@ -139,6 +150,9 @@ void PWSampler::acquireSample()
     sample->set_numThreads(numThreads);
     sample->set_nice(niceness);
     sample->set_state(state);
+    sample->set_vmSize(vsize);
+    if (std::optional<quint64> uptimeMs = readSysUptimeMillis())
+        sample->set_uptime(*uptimeMs - startTime);
     if (totalMem)
         sample->set_ramSize(*totalMem);
     m_samples.append(sample);
@@ -158,4 +172,28 @@ std::optional<quint64> PWSampler::readTotalMem()
     quint32 memunit = info.mem_unit;
     quint64 total = info.totalram;
     return total*memunit;
+}
+
+std::optional<quint64> PWSampler::readSysUptimeMillis()
+{
+    QFile f(QSL("/proc/uptime"));
+    if (!f.open(QIODevice::ReadOnly)) {
+        qWarning() << "Could not open /proc/uptime";
+        return std::nullopt;
+    }
+
+    QString s = f.readAll();
+    QStringList tokens = s.split(' ');
+    if (tokens.size() != 2) {
+        qWarning() << "Cannot parse /proc/uptime content";
+        return std::nullopt;
+    }
+
+    double uptimeSecs = lqt::string_to_float(tokens[0], -1);
+    if (uptimeSecs < 0) {
+        qWarning() << "Cannot parse /proc/uptime content";
+        return std::nullopt;
+    }
+
+    return qRound64(uptimeSecs*1000);
 }

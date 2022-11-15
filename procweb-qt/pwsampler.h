@@ -22,6 +22,7 @@ private slots:
 
 private:
     std::optional<quint64> readTotalMem();
+    std::optional<quint64> readSysUptimeMillis();
 
 private:
     QList<PWSampleRef> m_samples;

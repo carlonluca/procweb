@@ -164,13 +164,18 @@ export class AppComponent {
     }
 
     computeSampleTable(sample: Sample) {
+        let langService = new HumanizeDurationLanguage()
+        let humanizer = new HumanizeDuration(langService)
+
         let rows: DisplayRow[] = []
         rows.push(new DisplayRow("State", this.computeStateValue(sample.state), "fa-face-sleeping"))
         rows.push(new DisplayRow("CPU usage", (sample.cpu*100).toFixed(2) + "%", ""))
-        rows.push(new DisplayRow("Resident Set Size", prettyBytes(sample.rssSize), ""))
+        rows.push(new DisplayRow("Resident set size", prettyBytes(sample.rssSize), ""))
+        rows.push(new DisplayRow("Virtual memory size", prettyBytes(sample.vmSize), ""));
         rows.push(new DisplayRow("Total main memory", prettyBytes(sample.ramSize), ""))
         rows.push(new DisplayRow("Niceness", "" + sample.nice, ""));
         rows.push(new DisplayRow("Number of threads", "" + sample.numThreads, ""))
+        rows.push(new DisplayRow("Uptime", humanizer.humanize(sample.uptime), ""))
 
         this.sampleTable = rows
         this.sampleTableTime = new Date(sample.ts).toString()
