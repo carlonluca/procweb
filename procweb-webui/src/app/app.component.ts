@@ -167,6 +167,7 @@ export class AppComponent {
         let langService = new HumanizeDurationLanguage()
         let humanizer = new HumanizeDuration(langService)
 
+        // TODO: check null values
         let rows: DisplayRow[] = []
         rows.push(new DisplayRow("State", this.computeStateValue(sample.state), "fa-face-sleeping"))
         rows.push(new DisplayRow("CPU usage", (sample.cpu*100).toFixed(2) + "%", ""))
@@ -176,6 +177,7 @@ export class AppComponent {
         rows.push(new DisplayRow("Niceness", "" + sample.nice, ""));
         rows.push(new DisplayRow("Number of threads", "" + sample.numThreads, ""))
         rows.push(new DisplayRow("Uptime", humanizer.humanize(sample.uptime), ""))
+        rows.push(new DisplayRow("Start time", new Date(sample.startTime).toString(), ""))
 
         this.sampleTable = rows
         this.sampleTableTime = new Date(sample.ts).toString()

@@ -12,7 +12,8 @@ export interface Sample {
     numThreads: number,
     nice: number,
     state: string,
-    uptime: number
+    uptime: number,
+    startTime: string
 }
 
 export interface Setup {

@@ -138,10 +138,18 @@ void PWSampler::acquireSample()
         vsize = lqt::string_to_int64(procStatValues[22], 0);
 
     // Start
-    qint64 startTime = 0;
+    qint64 startTimeMs = 0;
     if (procStatValues.size() > 21)
         if (long int clockTick = sysconf(_SC_CLK_TCK))
-            startTime = qRound64(lqt::string_to_uint64(procStatValues[21], 0)/static_cast<double>(clockTick))*1000;
+            startTimeMs = qRound64(lqt::string_to_uint64(procStatValues[21], 0)/static_cast<double>(clockTick))*1000;
+
+    std::optional<quint64> uptimeMs = readSysUptimeMillis();
+    QDateTime startTimeProc;
+    if (uptimeMs) {
+        const quint64 procUptimeMs = *uptimeMs - startTimeMs;
+        const quint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+        startTimeProc = QDateTime::fromMSecsSinceEpoch(nowMs - procUptimeMs);
+    }
 
     PWSampleRef sample(new PWSample);
     sample->set_cpu(cpu);
@@ -151,10 +159,12 @@ void PWSampler::acquireSample()
     sample->set_nice(niceness);
     sample->set_state(state);
     sample->set_vmSize(vsize);
-    if (std::optional<quint64> uptimeMs = readSysUptimeMillis())
-        sample->set_uptime(*uptimeMs - startTime);
+    if (uptimeMs)
+        sample->set_uptime(*uptimeMs - startTimeMs);
     if (totalMem)
         sample->set_ramSize(*totalMem);
+    if (!startTimeProc.isNull())
+        sample->set_startTime(startTimeProc.toString(Qt::ISODateWithMs));
     m_samples.append(sample);
 
     m_lastCpuTime = cpuTime;
