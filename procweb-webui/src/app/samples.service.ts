@@ -13,7 +13,11 @@ export interface Sample {
     nice: number,
     state: string,
     uptime: number,
-    startTime: string
+    startTime: string,
+    readAll: number,
+    writeAll: number,
+    readDisk: number,
+    writeDisk: number
 }
 
 export interface Setup {

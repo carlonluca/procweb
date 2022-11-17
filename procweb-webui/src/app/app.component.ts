@@ -174,6 +174,10 @@ export class AppComponent {
         rows.push(new DisplayRow("Resident set size", prettyBytes(sample.rssSize), ""))
         rows.push(new DisplayRow("Virtual memory size", prettyBytes(sample.vmSize), ""));
         rows.push(new DisplayRow("Total main memory", prettyBytes(sample.ramSize), ""))
+        rows.push(new DisplayRow("Total read from disk", prettyBytes(sample.readDisk), ""))
+        rows.push(new DisplayRow("Total written to disk", prettyBytes(sample.writeDisk), ""))
+        rows.push(new DisplayRow("Total read", prettyBytes(sample.readAll), ""))
+        rows.push(new DisplayRow("Total written", prettyBytes(sample.writeAll), ""))
         rows.push(new DisplayRow("Niceness", "" + sample.nice, ""));
         rows.push(new DisplayRow("Number of threads", "" + sample.numThreads, ""))
         rows.push(new DisplayRow("Uptime", humanizer.humanize(sample.uptime), ""))

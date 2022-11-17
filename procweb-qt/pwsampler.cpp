@@ -10,6 +10,15 @@
 #include "pwsampler.h"
 #include "pwreader.h"
 
+const QRegularExpression PWSampler::REGEX_RCHAR =
+        QRegularExpression(QSL("^rchar:\\s+(\\d+)"));
+const QRegularExpression PWSampler::REGEX_WCHAR =
+        QRegularExpression(QSL("^wchar:\\s+(\\d+)"));
+const QRegularExpression PWSampler::REGEX_RBYTES =
+        QRegularExpression(QSL("^read_bytes:\\s+(\\d+)"));
+const QRegularExpression PWSampler::REGEX_WBYTES =
+        QRegularExpression(QSL("^write_bytes:\\s+(\\d+)"));
+
 PWSampler::PWSampler(int pid, QObject* parent) :
     QObject{parent}
   , m_samplerTimer(new QTimer(this))
@@ -151,6 +160,10 @@ void PWSampler::acquireSample()
         startTimeProc = QDateTime::fromMSecsSinceEpoch(nowMs - procUptimeMs);
     }
 
+    // Proc io
+    PWIoValues all { 0, 0 };
+    PWIoValues disk { 0, 0 };
+
     PWSampleRef sample(new PWSample);
     sample->set_cpu(cpu);
     sample->set_ts(QDateTime::currentMSecsSinceEpoch());
@@ -165,6 +178,12 @@ void PWSampler::acquireSample()
         sample->set_ramSize(*totalMem);
     if (!startTimeProc.isNull())
         sample->set_startTime(startTimeProc.toString(Qt::ISODateWithMs));
+    if (readIoValues(disk, all)) {
+        sample->set_readAll(all.read);
+        sample->set_readDisk(disk.read);
+        sample->set_writeAll(all.written);
+        sample->set_writeDisk(disk.written);
+    }
     m_samples.append(sample);
 
     m_lastCpuTime = cpuTime;
@@ -206,4 +225,36 @@ std::optional<quint64> PWSampler::readSysUptimeMillis()
     }
 
     return qRound64(uptimeSecs*1000);
+}
+
+bool PWSampler::readIoValues(PWIoValues& disk, PWIoValues& all)
+{
+    QFile procIoFile(PWReader::procIoDir(m_pid));
+    if (!procIoFile.exists()) {
+        qWarning() << "io stat file does not exist";
+        return false;
+    }
+
+    if (!procIoFile.open(QIODevice::ReadOnly)) {
+        qWarning() << "io stat could not be opened: permission issue?";
+        return false;
+    }
+
+    auto readIfMatches = [] (const QRegularExpression& regex, const QString& pattern, quint64& v) {
+        QRegularExpressionMatch match = regex.match(pattern);
+        if (!match.hasMatch())
+            return;
+        v = lqt::string_to_uint64(match.captured(1), 0);
+    };
+
+    const QString content = procIoFile.readAll();
+    const QStringList lines = content.split("\n", Qt::SkipEmptyParts);
+    for (const QString& line : lines) {
+        readIfMatches(REGEX_RBYTES, line, disk.read);
+        readIfMatches(REGEX_WBYTES, line, disk.written);
+        readIfMatches(REGEX_RCHAR, line, all.read);
+        readIfMatches(REGEX_WCHAR, line, all.written);
+    }
+
+    return true;
 }

@@ -17,6 +17,14 @@ QString PWReader::procStatDir(int pid)
     });
 }
 
+QString PWReader::procIoDir(int pid)
+{
+    return lqt::path_combine({
+        procDir(pid),
+        QSL("io")
+    });
+}
+
 QString PWReader::readCmdline(int pid)
 {
     const QString filePath = lqt::path_combine({ procDir(pid), QSL("cmdline") });

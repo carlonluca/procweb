@@ -3,10 +3,17 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QRegularExpression>
 
 #include <lqtutils_prop.h>
 
 #include "pwdata.h"
+
+struct PWIoValues
+{
+    quint64 read;
+    quint64 written;
+};
 
 class PWSampler : public QObject
 {
@@ -23,8 +30,13 @@ private slots:
 private:
     std::optional<quint64> readTotalMem();
     std::optional<quint64> readSysUptimeMillis();
+    bool readIoValues(PWIoValues& disk, PWIoValues& all);
 
 private:
+    static const QRegularExpression REGEX_RCHAR;
+    static const QRegularExpression REGEX_WCHAR;
+    static const QRegularExpression REGEX_RBYTES;
+    static const QRegularExpression REGEX_WBYTES;
     QList<PWSampleRef> m_samples;
     QTimer* m_samplerTimer;
     int m_pid;

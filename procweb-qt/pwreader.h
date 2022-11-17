@@ -10,6 +10,7 @@ public:
 
     static QString procDir(int pid);
     static QString procStatDir(int pid);
+    static QString procIoDir(int pid);
     static QString readCmdline(int pid);
 };
 
