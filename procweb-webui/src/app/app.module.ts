@@ -6,10 +6,11 @@ import { HttpClientModule } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
 import { NgxEchartsModule } from 'ngx-echarts'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
-import { MatLegacySelectModule as MatSelectModule } from '@angular/material/legacy-select'
-import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field'
-import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input'
-import { MatLegacyTableModule as MatTableModule } from '@angular/material/legacy-table'
+import { MatSliderModule } from '@angular/material/slider'
+import { MatSelectModule } from '@angular/material/select'
+import { MatTableModule } from '@angular/material/table'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 
 @NgModule({
@@ -21,7 +22,10 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
       AppRoutingModule,
       HttpClientModule,
       FormsModule,
+      MatSliderModule,
       MatSelectModule,
+      MatSelectModule,
+      MatTableModule,
       MatFormFieldModule,
       MatInputModule,
       MatTableModule,

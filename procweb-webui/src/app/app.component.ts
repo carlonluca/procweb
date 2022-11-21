@@ -92,12 +92,14 @@ export class AppComponent {
                         type: "line",
                         data: cpuData,
                         showSymbol: false,
-                        yAxisIndex: 0
+                        yAxisIndex: 0,
+                        color: "orange"
                     }, {
                         type: "line",
                         data: memData,
                         showSymbol: false,
-                        yAxisIndex: 1
+                        yAxisIndex: 1,
+                        color: "red"
                     }
                 ],
                 xAxis: {

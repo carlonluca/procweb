@@ -1,4 +1,4 @@
-<section class="mat-typography">
+<section class="mat-typography page-element">
     <h1 class="mat-h1">procweb-webui</h1>
     <div class="center-container">Recording time: {{ sampledTime }}</div>
     <div echarts [options]="chartOption" [merge]="dynamicData" class="demo-chart"></div>
@@ -6,10 +6,27 @@
     <br />
 
     <div class="center-container">
+        <div class="center-container axis-slider">Left range</div>
+        <div class="center-container axis-slider">Right range</div>
+    </div>
+    <div class="center-container">
+        <mat-slider class="axis-slider" min="0" max="100">
+            <input value="10" matSliderStartThumb>
+            <input value="20" matSliderEndThumb>
+        </mat-slider>
+        <mat-slider class="axis-slider" min="0" max="100">
+            <input value="10" matSliderStartThumb>
+            <input value="20" matSliderEndThumb>
+        </mat-slider>
+    </div>
+
+    <br />
+
+    <div class="center-container">
         {{ procData }}
     </div>
-    
-    <br/>
+
+    <br />
 
     <div class="center-container">
         <mat-label>X axis range:</mat-label>
@@ -51,5 +68,5 @@
         {{ this.sampleTableTime }}
     </div>
 
-    <br/>
+    <br />
 </section>
