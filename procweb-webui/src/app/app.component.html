@@ -10,13 +10,13 @@
         <div class="center-container axis-slider">Right range</div>
     </div>
     <div class="center-container">
-        <mat-slider class="axis-slider" min="0" max="100">
-            <input value="10" matSliderStartThumb>
-            <input value="20" matSliderEndThumb>
+        <mat-slider class="axis-slider" (min)="leftMin" (max)="leftMax" [disabled]="!leftEnabled">
+            <input [(value)]="leftSelectedMin" (valueChange)="leftSelectedChanged()" matSliderStartThumb>
+            <input [(value)]="leftSelectedMax" (valueChange)="leftSelectedChanged()" matSliderEndThumb>
         </mat-slider>
-        <mat-slider class="axis-slider" min="0" max="100">
-            <input value="10" matSliderStartThumb>
-            <input value="20" matSliderEndThumb>
+        <mat-slider class="axis-slider" (min)="rightMin" (max)="rightMax" [disabled]="!rightEnabled">
+            <input [(value)]="rightSelectedMin" matSliderStartThumb>
+            <input [(value)]="rightSelectedMax" matSliderEndThumb>
         </mat-slider>
     </div>
 
@@ -32,12 +32,11 @@
         <mat-label>X axis range:</mat-label>
         <mat-form-field class="inline-comp" appearance="fill">
             <mat-label>Input</mat-label>
-            <input matInput class="align-right" type="number" min="0" value="1" [(ngModel)]="selectedValue"
-                (change)="onChange()">
+            <input matInput class="align-right" type="number" min="0" value="1" [(ngModel)]="selectedValue">
         </mat-form-field>
         <mat-form-field class="inline-comp" appearance="fill">
             <mat-label>Unit of measure</mat-label>
-            <mat-select [(ngModel)]="selectedUom" (selectionChange)="onChange()">
+            <mat-select [(ngModel)]="selectedUom">
                 <mat-option *ngFor="let timeUom of timeUoms" [value]="timeUom">
                     {{ timeUom.display }}
                 </mat-option>

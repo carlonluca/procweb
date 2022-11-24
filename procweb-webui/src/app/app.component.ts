@@ -63,6 +63,19 @@ export class AppComponent {
     sampleLast?: Sample = undefined
     displayedColumns: string[] = ['description', 'value']
 
+    leftMin: number = 0
+    leftSelectedMin: number = 10
+    leftMax: number = 100
+    leftSelectedMax: number = 80
+    leftEnabled: boolean = false
+    leftFullSelection: boolean = true
+    rightMin: number = 0
+    rightSelectedMin: number = 0
+    rightMax: number = 50
+    rightSelectedMax: number = 5E3
+    rightEnabled: boolean = false
+    rightFullSelection: boolean = true
+
     constructor(private sampleService: SamplesService) { }
 
     ngOnInit() {
@@ -87,6 +100,22 @@ export class AppComponent {
             this.computeSamplingTime(data)
             this.computeSampleTable(data[data.length - 1])
 
+            this.rightMin = 0
+            this.rightMax = data[0].ramSize
+            this.rightEnabled = true
+            if (this.rightFullSelection) {
+                this.rightSelectedMin = this.rightMin
+                this.rightSelectedMax = this.rightMax
+            }
+
+            this.leftMin = 0
+            this.leftMax = 100
+            this.leftEnabled = true
+            if (this.leftFullSelection) {
+                this.leftSelectedMin = this.leftMin
+                this.leftSelectedMax = this.leftMax
+            }
+
             this.dynamicData = {
                 series: [{
                         type: "line",
@@ -110,8 +139,8 @@ export class AppComponent {
                     }
                 },
                 yAxis: [{
-                    min: 0,
-                    max: 100,
+                    min: this.leftSelectedMin,
+                    max: this.leftSelectedMax,
                     axisLabel: {
                         formatter: (value: number, index: number): string => {
                             return value + "%"
@@ -204,5 +233,13 @@ export class AppComponent {
         return state
     }
 
-    onChange() {}
+    leftSelectedChanged() {
+        this.leftFullSelection = false
+        this.dynamicData = {
+            yAxis: {
+                min: this.leftSelectedMin,
+                max: this.leftSelectedMax
+            }
+        }
+    }
 }
