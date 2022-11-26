@@ -10,13 +10,13 @@
         <div class="center-container axis-slider">Right range</div>
     </div>
     <div class="center-container">
-        <mat-slider class="axis-slider" (min)="leftMin" (max)="leftMax" [disabled]="!leftEnabled">
-            <input [(value)]="leftSelectedMin" (valueChange)="leftSelectedChanged()" matSliderStartThumb>
-            <input [(value)]="leftSelectedMax" (valueChange)="leftSelectedChanged()" matSliderEndThumb>
+        <mat-slider class="axis-slider" [min]="leftMin" [max]="leftMax" [disabled]="!leftEnabled">
+            <input [(value)]="leftSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
+            <input [(value)]="leftSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
         </mat-slider>
-        <mat-slider class="axis-slider" (min)="rightMin" (max)="rightMax" [disabled]="!rightEnabled">
-            <input [(value)]="rightSelectedMin" matSliderStartThumb>
-            <input [(value)]="rightSelectedMax" matSliderEndThumb>
+        <mat-slider class="axis-slider" [min]="rightMin" [max]="rightMax" [disabled]="!rightEnabled">
+            <input [(value)]="rightSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
+            <input [(value)]="rightSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
         </mat-slider>
     </div>
 

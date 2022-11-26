@@ -148,8 +148,8 @@ export class AppComponent {
                         color: "white"
                     }
                 }, {
-                    min: 0,
-                    max: data[0].ramSize,
+                    min: this.rightSelectedMin,
+                    max: this.rightSelectedMax,
                     axisLabel: {
                         formatter: (value: number, index: number): string => {
                             return prettyBytes(value)
@@ -233,13 +233,18 @@ export class AppComponent {
         return state
     }
 
-    leftSelectedChanged() {
+    selectionChanged() {
+        console.log("Right:", this.leftSelectedMax, this.leftMax)
         this.leftFullSelection = false
+        this.rightFullSelection = false
         this.dynamicData = {
-            yAxis: {
+            yAxis: [{
                 min: this.leftSelectedMin,
                 max: this.leftSelectedMax
-            }
+            }, {
+                min: this.rightSelectedMin,
+                max: this.rightSelectedMax
+            }]
         }
     }
 }
