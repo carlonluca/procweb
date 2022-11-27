@@ -104,16 +104,16 @@ export class AppComponent {
             this.rightMax = data[0].ramSize
             this.rightEnabled = true
             if (this.rightFullSelection) {
-                this.rightSelectedMin = this.rightMin
-                this.rightSelectedMax = this.rightMax
+                this.rightSelectedMin = 0
+                this.rightSelectedMax = 1
             }
 
             this.leftMin = 0
             this.leftMax = 100
             this.leftEnabled = true
             if (this.leftFullSelection) {
-                this.leftSelectedMin = this.leftMin
-                this.leftSelectedMax = this.leftMax
+                this.leftSelectedMin = 0
+                this.leftSelectedMax = 1
             }
 
             this.dynamicData = {
@@ -139,8 +139,8 @@ export class AppComponent {
                     }
                 },
                 yAxis: [{
-                    min: this.leftSelectedMin,
-                    max: this.leftSelectedMax,
+                    min: this.leftSelectedMin*(this.leftMax - this.leftMin) - this.leftMin,
+                    max: this.leftSelectedMax*(this.leftMax - this.leftMin) - this.leftMin,
                     axisLabel: {
                         formatter: (value: number, index: number): string => {
                             return value + "%"
@@ -148,8 +148,8 @@ export class AppComponent {
                         color: "white"
                     }
                 }, {
-                    min: this.rightSelectedMin,
-                    max: this.rightSelectedMax,
+                    min: this.rightSelectedMin*(this.rightMax - this.rightMin) - this.rightMin,
+                    max: this.rightSelectedMax*(this.rightMax - this.rightMin) - this.rightMin,
                     axisLabel: {
                         formatter: (value: number, index: number): string => {
                             return prettyBytes(value)
@@ -234,16 +234,15 @@ export class AppComponent {
     }
 
     selectionChanged() {
-        console.log("Right:", this.leftSelectedMax, this.leftMax)
         this.leftFullSelection = false
         this.rightFullSelection = false
         this.dynamicData = {
             yAxis: [{
-                min: this.leftSelectedMin,
-                max: this.leftSelectedMax
+                min: this.leftSelectedMin*(this.leftMax - this.leftMin) - this.leftMin,
+                max: this.leftSelectedMax*(this.leftMax - this.leftMin) - this.leftMin
             }, {
-                min: this.rightSelectedMin,
-                max: this.rightSelectedMax
+                min: this.rightSelectedMin*(this.rightMax - this.rightMin) - this.rightMin,
+                max: this.rightSelectedMax*(this.rightMax - this.rightMin) - this.rightMin
             }]
         }
     }
