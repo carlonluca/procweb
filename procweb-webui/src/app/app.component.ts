@@ -15,7 +15,7 @@ class DisplayRow {
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.sass']
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
     title = 'procweb-webui'
@@ -143,7 +143,7 @@ export class AppComponent {
                     max: this.leftSelectedMax*(this.leftMax - this.leftMin) - this.leftMin,
                     axisLabel: {
                         formatter: (value: number, index: number): string => {
-                            return value + "%"
+                            return Math.round(value) + "%"
                         },
                         color: "white"
                     }

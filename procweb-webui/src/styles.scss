@@ -1,0 +1,22 @@
+.center-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inline-comp {
+    margin-left: 1em;
+}
+
+.align-right {
+    text-align: right;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}

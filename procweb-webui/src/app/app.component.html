@@ -14,7 +14,7 @@
             <input [(value)]="leftSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
             <input [(value)]="leftSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
         </mat-slider>
-        <mat-slider class="axis-slider" min="0" max="1" step="0.01" [disabled]="!rightEnabled">
+        <mat-slider id="sliderRight" class="axis-slider" min="0" max="1" step="0.01" [disabled]="!rightEnabled">
             <input [(value)]="rightSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
             <input [(value)]="rightSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
         </mat-slider>
