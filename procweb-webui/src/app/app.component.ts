@@ -12,6 +12,10 @@ class DisplayRow {
         public icon: string) {}
 }
 
+export class Measure {
+    constructor(public label: string, public key: string) {}
+}
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -62,6 +66,14 @@ export class AppComponent {
     sampleTableTime: string = "-"
     sampleLast?: Sample = undefined
     displayedColumns: string[] = ['description', 'value']
+
+    // Measures
+    measures: Measure[] = [
+        { label: "CPU usage", key: "cpu" },
+        { label: "Resident Set Size", key: "rssSize" }
+    ]
+    measureLeft: Measure = this.measures[0]
+    measureRight: Measure = this.measures[1]
 
     leftMin: number = 0
     leftSelectedMin: number = 10

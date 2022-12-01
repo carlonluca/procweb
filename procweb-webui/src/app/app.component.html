@@ -1,5 +1,5 @@
 <section class="mat-typography page-element">
-    <h1 class="mat-h1">procweb-webui</h1>
+    <h1>procweb-webui</h1>
     <div class="center-container">Recording time: {{ sampledTime }}</div>
     <div echarts [options]="chartOption" [merge]="dynamicData" class="demo-chart"></div>
 
@@ -10,7 +10,15 @@
         <div class="center-container axis-slider">Right range</div>
     </div>
     <div class="center-container">
-        <mat-slider class="axis-slider" min="0" max="1" step="0.01" [disabled]="!leftEnabled">
+        <mat-form-field id="comboLeft" appearance="fill">
+            <mat-label>Left measure</mat-label>
+            <mat-select [(ngModel)]="measureLeft">
+                <mat-option *ngFor="let measure of this.measures" [value]="measure">
+                    {{ measure.label }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-slider id="sliderLeft" class="axis-slider" min="0" max="1" step="0.01" [disabled]="!leftEnabled">
             <input [(value)]="leftSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
             <input [(value)]="leftSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
         </mat-slider>
@@ -18,6 +26,18 @@
             <input [(value)]="rightSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
             <input [(value)]="rightSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
         </mat-slider>
+        <mat-form-field id="comboRight" appearance="fill">
+            <mat-label>Right measure</mat-label>
+            <mat-select [(ngModel)]="measureRight">
+                <mat-option *ngFor="let measure of this.measures" [value]="measure">
+                    {{ measure.label }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+    <div class="center-container">
+        
+        
     </div>
 
     <br />
