@@ -1,9 +1,10 @@
 import { Component } from '@angular/core'
 import { EChartsOption } from 'echarts'
 import { interval, Observable } from 'rxjs'
-import prettyBytes from 'pretty-bytes'
+import { PWMeasure, PWMeasureCpu, PWMwasureRss } from './measure'
 import { HumanizeDurationLanguage, HumanizeDuration } from 'humanize-duration-ts';
 import { Setup, Sample, SamplesService, TimeUom } from './samples.service'
+import prettyBytes from 'pretty-bytes'
 
 class DisplayRow {
     constructor(
@@ -70,12 +71,12 @@ export class AppComponent {
     displayedColumns: string[] = ['description', 'value']
 
     // Measures
-    measures: Measure[] = [
-        { label: "CPU usage", key: "cpu" },
-        { label: "Resident Set Size", key: "rssSize" }
+    measures: PWMeasure[] = [
+        new PWMeasureCpu(),
+        new PWMwasureRss()
     ]
-    measureLeft: Measure = this.measures[0]
-    measureRight: Measure = this.measures[1]
+    measureLeft: PWMeasure = this.measures[0]
+    measureRight: PWMeasure = this.measures[1]
 
     leftMin: number = 0
     leftSelectedMin: number = 10
@@ -106,24 +107,24 @@ export class AppComponent {
             let leftData: number[][] = []
             let rightData: number[][] = []
             data.forEach((sample: Sample) => {
-                leftData.push([sample.ts, ((sample as any)[this.measureLeft.key] as number) * this.factorForKey(this.measureLeft.key)])
-                rightData.push([sample.ts, ((sample as any)[this.measureRight.key] as number) * this.factorForKey(this.measureRight.key)])
+                leftData.push([sample.ts, ((sample as any)[this.measureLeft.key] as number) * this.measureLeft.displayFactor()])
+                rightData.push([sample.ts, ((sample as any)[this.measureRight.key] as number) * this.measureRight.displayFactor()])
             })
 
             this.sampleLast = data[data.length - 1]
             this.computeSamplingTime(data)
             this.computeSampleTable(data[data.length - 1])
 
-            this.rightMin = this.minForKey(this.measureRight.key, data)
-            this.rightMax = this.maxForKey(this.measureRight.key, data)
+            this.rightMin = this.measureRight.minValue(data)
+            this.rightMax = this.measureRight.maxValue(data)
             this.rightEnabled = true
             if (this.rightFullSelection) {
                 this.rightSelectedMin = 0
                 this.rightSelectedMax = 1
             }
 
-            this.leftMin = this.minForKey(this.measureLeft.key, data)
-            this.leftMax = this.maxForKey(this.measureLeft.key, data)
+            this.leftMin = this.measureLeft.minValue(data)
+            this.leftMax = this.measureLeft.maxValue(data)
             this.leftEnabled = true
             if (this.leftFullSelection) {
                 this.leftSelectedMin = 0
@@ -157,18 +158,18 @@ export class AppComponent {
                     max: this.leftSelectedMax*(this.leftMax - this.leftMin) - this.leftMin,
                     axisLabel: {
                         formatter: (value: number, index: number): string => {
-                            return Math.round(value) + "%"
+                            return this.measureLeft.displayValue(value)
                         },
-                        color: "white"
+                        color: this.leftColor
                     }
                 }, {
                     min: this.rightSelectedMin*(this.rightMax - this.rightMin) - this.rightMin,
                     max: this.rightSelectedMax*(this.rightMax - this.rightMin) - this.rightMin,
                     axisLabel: {
                         formatter: (value: number, index: number): string => {
-                            return prettyBytes(value)
+                            return this.measureRight.displayValue(value)
                         },
-                        color: "white"
+                        color: this.rightColor
                     }
                 }]
             }
@@ -190,12 +191,6 @@ export class AppComponent {
     arrayMinValue(arr: Sample[], key: string): number {
         return (arr.reduce((p, v): Sample => {
             return (p as any)[key] < (v as any).cpu ? p : v
-        }) as any)[key]
-    }
-
-    arrayMaxValue(arr: Sample[], key: string): number {
-        return (arr.reduce((p, v): Sample => {
-            return (p as any).cpu > v.cpu ? p : v
         }) as any)[key]
     }
 
@@ -258,30 +253,6 @@ export class AppComponent {
                 min: this.rightSelectedMin*(this.rightMax - this.rightMin) - this.rightMin,
                 max: this.rightSelectedMax*(this.rightMax - this.rightMin) - this.rightMin
             }]
-        }
-    }
-
-    minForKey(key: string, samples: Sample[]): number {
-        return 0
-    }
-
-    maxForKey(key: string, samples: Sample[]): number {
-        switch (key) {
-            case "cpu":
-                return 100
-            case "rssSize":
-                return samples[0].ramSize
-            default:
-                return this.arrayMaxValue(samples, key)
-        }
-    }
-
-    factorForKey(key: string): number {
-        switch (key) {
-            case "cpu":
-                return 100
-            default:
-                return 1
         }
     }
 }
