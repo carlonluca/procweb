@@ -25,6 +25,8 @@ export class AppComponent {
     title = 'procweb-webui'
     echartData: number[][] = []
     theme = 'dark'
+    leftColor: string = "orange"
+    rightColor: string = "red"
     chartOption: EChartsOption = {
         xAxis: {
             type: 'value',
@@ -101,27 +103,27 @@ export class AppComponent {
             if (!data || data.length <= 0)
                 return
 
-            let cpuData: number[][] = []
-            let memData: number[][] = []
+            let leftData: number[][] = []
+            let rightData: number[][] = []
             data.forEach((sample: Sample) => {
-                cpuData.push([sample.ts, sample.cpu * 100])
-                memData.push([sample.ts, sample.rssSize])
+                leftData.push([sample.ts, ((sample as any)[this.measureLeft.key] as number) * this.factorForKey(this.measureLeft.key)])
+                rightData.push([sample.ts, ((sample as any)[this.measureRight.key] as number) * this.factorForKey(this.measureRight.key)])
             })
 
             this.sampleLast = data[data.length - 1]
             this.computeSamplingTime(data)
             this.computeSampleTable(data[data.length - 1])
 
-            this.rightMin = 0
-            this.rightMax = data[0].ramSize
+            this.rightMin = this.minForKey(this.measureRight.key, data)
+            this.rightMax = this.maxForKey(this.measureRight.key, data)
             this.rightEnabled = true
             if (this.rightFullSelection) {
                 this.rightSelectedMin = 0
                 this.rightSelectedMax = 1
             }
 
-            this.leftMin = 0
-            this.leftMax = 100
+            this.leftMin = this.minForKey(this.measureLeft.key, data)
+            this.leftMax = this.maxForKey(this.measureLeft.key, data)
             this.leftEnabled = true
             if (this.leftFullSelection) {
                 this.leftSelectedMin = 0
@@ -131,16 +133,16 @@ export class AppComponent {
             this.dynamicData = {
                 series: [{
                         type: "line",
-                        data: cpuData,
+                        data: leftData,
                         showSymbol: false,
                         yAxisIndex: 0,
-                        color: "orange"
+                        color: this.leftColor
                     }, {
                         type: "line",
-                        data: memData,
+                        data: rightData,
                         showSymbol: false,
                         yAxisIndex: 1,
-                        color: "red"
+                        color: this.rightColor
                     }
                 ],
                 xAxis: {
@@ -185,16 +187,16 @@ export class AppComponent {
         }).ts
     }
 
-    arrayMinValue(arr: Sample[]): number {
-        return arr.reduce((p, v): Sample => {
-            return p.cpu < v.cpu ? p : v
-        }).cpu * 100
+    arrayMinValue(arr: Sample[], key: string): number {
+        return (arr.reduce((p, v): Sample => {
+            return (p as any)[key] < (v as any).cpu ? p : v
+        }) as any)[key]
     }
 
-    arrayMaxValue(arr: Sample[]): number {
-        return arr.reduce((p, v): Sample => {
-            return p.cpu > v.cpu ? p : v
-        }).cpu * 100
+    arrayMaxValue(arr: Sample[], key: string): number {
+        return (arr.reduce((p, v): Sample => {
+            return (p as any).cpu > v.cpu ? p : v
+        }) as any)[key]
     }
 
     computeSamplingTime(data: Sample[]) {
@@ -256,6 +258,30 @@ export class AppComponent {
                 min: this.rightSelectedMin*(this.rightMax - this.rightMin) - this.rightMin,
                 max: this.rightSelectedMax*(this.rightMax - this.rightMin) - this.rightMin
             }]
+        }
+    }
+
+    minForKey(key: string, samples: Sample[]): number {
+        return 0
+    }
+
+    maxForKey(key: string, samples: Sample[]): number {
+        switch (key) {
+            case "cpu":
+                return 100
+            case "rssSize":
+                return samples[0].ramSize
+            default:
+                return this.arrayMaxValue(samples, key)
+        }
+    }
+
+    factorForKey(key: string): number {
+        switch (key) {
+            case "cpu":
+                return 100
+            default:
+                return 1
         }
     }
 }
