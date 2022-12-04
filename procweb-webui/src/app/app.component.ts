@@ -73,7 +73,8 @@ export class AppComponent {
     // Measures
     measures: PWMeasure[] = [
         new PWMeasureCpu(),
-        new PWMwasureRss()
+        new PWMwasureRss(),
+        new PWMeasure("Virtual memory size", "vmSize")
     ]
     measureLeft: PWMeasure = this.measures[0]
     measureRight: PWMeasure = this.measures[1]

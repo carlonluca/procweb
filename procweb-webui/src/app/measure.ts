@@ -15,7 +15,7 @@ export class PWMeasure {
     }
 
     maxValue(samples: Sample[]): number {
-        return PWMeasure.arrayMaxValue(samples, this.key)
+        return PWMeasure.arrayMaxValue(samples, this.key)*1.1
     }
 
     displayValue(value: number): string {
@@ -50,7 +50,7 @@ export class PWMeasureCpu extends PWMeasure {
 }
 
 export class PWMwasureRss extends PWMeasure {
-    constructor() { super("Resident Set Size", "rssSize") }
+    constructor() { super("Resident set size", "rssSize") }
 
     override maxValue(samples: Sample[]): number {
         return samples[0].ramSize
