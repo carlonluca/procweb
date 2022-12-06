@@ -1,9 +1,6 @@
 <section class="mat-typography page-element">
     <h1 class="mat-headline-2">procweb-webui</h1>
     <div class="center-container">Recording time: {{ sampledTime }}</div>
-    <div echarts [options]="chartOption" [merge]="dynamicData" class="demo-chart"></div>
-
-    <br />
 
     <div class="center-container">
         <div class="center-container axis-slider">Left range</div>
@@ -36,9 +33,7 @@
         </mat-form-field>
     </div>
 
-    <div class="center-container">
-        {{ procData }}
-    </div>
+    <div echarts [options]="chartOption" [merge]="dynamicData" class="demo-chart"></div>
 
     <br />
 
@@ -56,6 +51,12 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
+    </div>
+
+    <br />
+
+    <div class="center-container">
+        {{ procData }}
     </div>
 
     <br />
