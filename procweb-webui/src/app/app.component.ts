@@ -4,6 +4,7 @@ import { interval, Observable } from 'rxjs'
 import { PWMeasure, PWMeasureCpu, PWMwasureRss } from './measure'
 import { HumanizeDurationLanguage, HumanizeDuration } from 'humanize-duration-ts';
 import { Setup, Sample, SamplesService, TimeUom } from './samples.service'
+import * as csv from 'csv-writer/web'
 import prettyBytes from 'pretty-bytes'
 
 class DisplayRow {
@@ -255,5 +256,24 @@ export class AppComponent {
                 max: this.rightSelectedMax*(this.rightMax - this.rightMin) - this.rightMin
             }]
         }
+    }
+
+    createCsv() {
+        let writer = csv.createObjectCsvStringifier({
+            header: [
+                { id: "param", title: "Parameter" },
+                { id: "value", title: "Value" }
+            ]
+        })
+
+        const records = [
+            { param: "p1", value: "v1" }
+        ]
+
+        console.log(writer.getHeaderString());
+        // => 'NAME,LANGUAGE\n'
+        
+        console.log(writer.stringifyRecords(records));
+        // => 'Bob,"French, English"\nMary,English\n'
     }
 }

@@ -15,6 +15,11 @@ table {
     width: 30%;
 }
 
+#buttonContainer {
+    display: flex;
+    justify-content: flex-end;
+}
+
 .page-element {
     margin-left: 3em;
     margin-right: 3em;

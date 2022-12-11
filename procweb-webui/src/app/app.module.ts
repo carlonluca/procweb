@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select'
 import { MatTableModule } from '@angular/material/table'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
+import { MatButtonModule } from '@angular/material/button'
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
 
 @NgModule({
@@ -29,6 +30,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
       MatFormFieldModule,
       MatInputModule,
       MatTableModule,
+      MatButtonModule,
       FontAwesomeModule,
       NgxEchartsModule.forRoot({
          /**
