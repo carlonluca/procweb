@@ -1,9 +1,10 @@
 import { Component } from '@angular/core'
 import { EChartsOption } from 'echarts'
-import { interval, Observable } from 'rxjs'
+import { first, interval, Observable } from 'rxjs'
 import { PWMeasure, PWMeasureCpu, PWMwasureRss } from './measure'
 import { HumanizeDurationLanguage, HumanizeDuration } from 'humanize-duration-ts';
 import { Setup, Sample, SamplesService, TimeUom } from './samples.service'
+import { saveAs } from 'file-saver'
 import * as csv from 'csv-writer/web'
 import prettyBytes from 'pretty-bytes'
 
@@ -16,6 +17,11 @@ class DisplayRow {
 
 export class Measure {
     constructor(public label: string, public key: string) {}
+}
+
+interface CsvEntry {
+    timestamp: string
+    cpu: number
 }
 
 @Component({
@@ -261,19 +267,28 @@ export class AppComponent {
     createCsv() {
         let writer = csv.createObjectCsvStringifier({
             header: [
-                { id: "param", title: "Parameter" },
-                { id: "value", title: "Value" }
+                { id: "timestamp", title: "Timestamp" },
+                { id: "cpu", title: "CPU [%]" }
             ]
         })
 
-        const records = [
-            { param: "p1", value: "v1" }
-        ]
+        const records: CsvEntry[] = []
+        this.sampleService.samples
+            .pipe(first())
+            .subscribe((samples: Sample[]) => {
+                samples.forEach((sample: Sample) => {
+                    records.push({
+                        timestamp: new Date(sample.ts).toISOString(),
+                        cpu: sample.cpu
+                    })
+                })
 
-        console.log(writer.getHeaderString());
-        // => 'NAME,LANGUAGE\n'
-        
-        console.log(writer.stringifyRecords(records));
-        // => 'Bob,"French, English"\nMary,English\n'
+                const blob = new Blob([
+                    writer.getHeaderString() as string,
+                    writer.stringifyRecords(records)
+                ], { type: 'text/csv' })
+                const fileName = "procweb_" + new Date().getTime() + ".csv"
+                saveAs(blob, fileName)
+            })
     }
 }
