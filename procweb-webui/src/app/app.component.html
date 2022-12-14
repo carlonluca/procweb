@@ -59,12 +59,13 @@
         </mat-form-field>
     </div>
 
-    <div echarts [options]="chartOption" [merge]="dynamicData" class="demo-chart"></div>
+    <div echarts [options]="chartOption" [merge]="dynamicData" class="demo-chart" (chartInit)="onChartInit($event)"></div>
 
     <br />
 
     <div id="buttonContainer">
         <button mat-flat-button (click)="createCsv()">Download CSV</button>
+        <button mat-flat-button (click)="createChartImage()" class="buttonLeft">Download Chart</button>
     </div>
 
     <br/>

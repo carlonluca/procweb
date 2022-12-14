@@ -80,6 +80,10 @@ export class AppComponent {
                     return new Date(value).toLocaleString(undefined, options)
                 }
             }
+        },
+        grid: {
+            bottom: 0,
+            containLabel: true
         }
     }
     dynamicData: EChartsOption = {}
@@ -122,6 +126,8 @@ export class AppComponent {
     rightSelectedMax: number = 5E3
     rightEnabled: boolean = false
     rightFullSelection: boolean = true
+
+    chartInstance: any = null
 
     constructor(private sampleService: SamplesService) { }
 
@@ -314,5 +320,19 @@ export class AppComponent {
                 const fileName = "procweb_" + new Date().getTime() + ".csv"
                 saveAs(blob, fileName)
             })
+    }
+
+    createChartImage() {
+        let img = new Image();
+        img.src = this.chartInstance.getDataURL({
+            type: "jpg"
+        })
+        require("image-to-blob")(img, {}, function(err: any, blob: any) {
+            saveAs(blob, "image.jpg")
+        })
+    }
+
+    onChartInit(ec: any) {
+        this.chartInstance = ec
     }
 }
