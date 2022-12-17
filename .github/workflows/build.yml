@@ -1,0 +1,18 @@
+name: Build
+on: push
+
+jobs:
+    build:
+        runs-on: ubuntu-22.04
+        container:
+            image: carlonluca/procweb-ci:latest
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+            with:
+                submodules: true
+          - name: Build
+            shell: bash
+            run: |
+                cd procweb-webui
+                ./build.sh
