@@ -26,8 +26,13 @@
 #include <QtHttpServer>
 #include <QHttpServerResponse>
 #include <QJsonObject>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
 
 #include <lserializer.h>
+#include <lqtutils_string.h>
+
+#include <unistd.h>
 
 #include "pwsampler.h"
 #include "pwdata.h"
@@ -36,14 +41,45 @@
 int main(int argc, char** argv)
 {
     QCoreApplication a(argc, argv);
+    QCoreApplication::setApplicationName("procweb");
+    QCoreApplication::setApplicationVersion(APP_VERSION);
+
+    QCommandLineOption daemonize(QStringList() << QSL("d") << QSL("daemonize"),
+                                 QSL("Daemonize the process"));
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QSL("Procweb samples a process and serves "
+                                         "web pages to interface with stored data."));
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addOption(daemonize);
+    parser.addPositionalArgument(QSL("procid"), QSL("Process ID to sample"));
+    if (!parser.parse(a.arguments())) {
+        qFatal("Failed to parse arguments: %s", qPrintable(parser.errorText()));
+        return 1;
+    }
 
     qint64 pid;
     if (qEnvironmentVariableIsSet("PROCWEB_APPIMAGE_BUILDER_TEST"))
         pid = 0;
-    else if (qEnvironmentVariableIsSet("PROCWEB_SELF_PID"))
+    else if (!qEnvironmentVariableIsSet("PROCWEB_SELF_PID")) {
+        QStringList args = parser.positionalArguments();
+        if (args.size() < 1)
+            parser.showHelp(1);
+        pid = args[0].toLongLong();
+    }
+
+    if (parser.isSet(daemonize)) {
+        pid_t processId = fork();
+        if (processId < 0)
+            qFatal("Failed to fork process");
+        if (processId > 0) {
+            qInfo() << "PID of child is" << processId;
+            return 0;
+        }
+    }
+
+    if (qEnvironmentVariableIsSet("PROCWEB_SELF_PID"))
         pid = a.applicationPid();
-    else
-        pid = a.arguments()[1].toLongLong();
 
     PWSampler sampler(pid);
     QHttpServer httpServer;

@@ -35,6 +35,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_compile_definitions(APP_VERSION="${CMAKE_VERSION}")
+
 include(3rdparty/lqtutils/CMakeLists.txt)
 include(3rdparty/lqobjectserializer/LQObjectSerializer/CMakeLists.txt)
 
