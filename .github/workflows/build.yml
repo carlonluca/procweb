@@ -20,3 +20,13 @@ jobs:
                 echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.profile
                 source ~/.profile
                 ./build.sh
+                cd ..
+                cd procweb-qt
+                mkdir build
+                cd build
+                /opt/Qt-arm64-6.4.0/bin/qt-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+                make
+                make install DESTDIR=AppDir
+                mkdir -p AppDir/usr/share/icons
+                touch AppDir/usr/share/icons/test.png
+                appimage-builder --recipe ../../appimage-builder/AppImageBuilder_aarch64.yml
