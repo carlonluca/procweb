@@ -16,6 +16,7 @@ jobs:
             run: |
                 cd procweb-webui
                 npm config set prefix '~/.npm-global'
+                npm config set cache '~/.npm-cache'
                 echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.profile
                 source ~/.profile
                 ./build.sh
