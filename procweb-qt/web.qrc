@@ -6,5 +6,6 @@
         <file alias="runtime.js">../procweb-webui/dist/procweb-webui/runtime.js</file>
         <file alias="styles.css">../procweb-webui/dist/procweb-webui/styles.css</file>
         <file alias="386.js">../procweb-webui/dist/procweb-webui/386.js</file>
+        <file alias="icon.svg">../icon.svg</file>
     </qresource>
 </RCC>
