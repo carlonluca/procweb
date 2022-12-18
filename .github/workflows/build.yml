@@ -10,9 +10,28 @@ jobs:
           - name: Checkout
             uses: actions/checkout@v3
             with:
-                submodules: true
+                submodules: recursive
           - name: Build
             shell: bash
             run: |
                 cd procweb-webui
+                npm config set prefix '/root/.npm-global' -g
+                npm config set cache '/root/.npm-cache' -g
+                echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.profile
+                source ~/.profile
                 ./build.sh
+                cd ..
+                cd procweb-qt
+                mkdir build
+                cd build
+                /opt/Qt-amd64-6.4.0/bin/qt-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+                make
+                make install DESTDIR=AppDir
+                mkdir -p AppDir/usr/share/icons
+                touch AppDir/usr/share/icons/test.png
+                appimage-builder --recipe ../../appimage-builder/AppImageBuilder_x64.yml
+          - name: "Archive AppImage"
+            uses: actions/upload-artifact@v2
+            with:
+              name: "AppImage"
+              path: procweb-qt/build/procweb-1.0.0-x86_64.AppImage
