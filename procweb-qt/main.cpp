@@ -119,6 +119,8 @@ int main(int argc, char** argv)
             return QHttpServerResponse(QByteArray("text/javascript"), f.readAll());
         if (fileName.endsWith(QStringLiteral(".html")))
             return QHttpServerResponse(QByteArray("text/html"), f.readAll());
+        if (fileName.endsWith(QStringLiteral(".svg")))
+            return QHttpServerResponse(QByteArray("image/svg+xml"), f.readAll());
         return QHttpServerResponse(QHttpServerResponse::StatusCode::NotFound);
     });
     const auto port = httpServer.listen(QHostAddress::Any, 3000);
