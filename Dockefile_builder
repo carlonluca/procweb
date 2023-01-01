@@ -2,6 +2,9 @@ FROM carlonluca/qt-dev:6.4.0_jammy
 RUN \
     apt-get update \
  && apt-get install -y curl \
+ && apt purge -y nodejs \
+ && dpkg --remove --force-remove-reinstreq libnode-dev \
+ && dpkg --remove --force-remove-reinstreq libnode72 \
  && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
  && apt-get update \
  && apt-get install -y nodejs \
