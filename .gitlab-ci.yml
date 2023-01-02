@@ -11,7 +11,7 @@ Build:
   stage: build
   artifacts:
     paths:
-      - procweb-qt/build/procweb-1.0.0-aarch64.AppImage
+      - procweb-qt/build/procweb-1.0.0-amd64.AppImage
   script:
     - cd procweb-webui
     - ./build.sh
@@ -19,13 +19,13 @@ Build:
     - cd procweb-qt
     - mkdir build
     - cd build
-    - /opt/Qt-arm64-6.4.0/bin/qt-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    - /opt/Qt-amd64-6.4.0/bin/qt-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
     - make
     - make install DESTDIR=AppDir
     - mkdir -p AppDir/usr/share/icons
     - touch AppDir/usr/share/icons/test.png
     - pip3 uninstall appimage-builder --yes
     - pip3 install git+https://github.com/carlonluca/appimage-builder.git@aarch64-fix
-    - appimage-builder --recipe ../../appimage-builder/AppImageBuilder_aarch64.yml
+    - appimage-builder --recipe ../../appimage-builder/AppImageBuilder_x64.yml
   rules:
     - when: manual
