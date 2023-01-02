@@ -24,8 +24,8 @@
 
 import { Component } from '@angular/core'
 import { EChartsOption } from 'echarts'
-import { first, interval, Observable } from 'rxjs'
-import { PWMeasure, PWMeasureCpu, PWMwasureRss } from './measure'
+import { first } from 'rxjs'
+import { PWMeasure, PWMeasureCpu, PWMwasureRss, TWMeasurePlain } from './measure'
 import { HumanizeDurationLanguage, HumanizeDuration } from 'humanize-duration-ts';
 import { Setup, Sample, SamplesService, TimeUom } from './samples.service'
 import { saveAs } from 'file-saver'
@@ -109,7 +109,12 @@ export class AppComponent {
     measures: PWMeasure[] = [
         new PWMeasureCpu(),
         new PWMwasureRss(),
-        new PWMeasure("Virtual memory size", "vmSize")
+        new PWMeasure("Virtual memory size", "vmSize"),
+        new PWMeasure("Total read from disk", "readDisk"),
+        new PWMeasure("Total written to disk", "writeDisk"),
+        new PWMeasure("Total read", "readAll"),
+        new PWMeasure("Total written", "writeAll"),
+        new TWMeasurePlain("Number of threads", "numThreads")
     ]
     measureLeft: PWMeasure = this.measures[0]
     measureRight: PWMeasure = this.measures[1]

@@ -52,7 +52,7 @@ export class PWMeasure {
 
     protected static arrayMaxValue(arr: Sample[], key: string): number {
         return (arr.reduce((p, v): Sample => {
-            return (p as any).cpu > v.cpu ? p : v
+            return (p as any)[key] > (v as any)[key] ? p : v
         }) as any)[key]
     }
 }
@@ -78,5 +78,11 @@ export class PWMwasureRss extends PWMeasure {
 
     override maxValue(samples: Sample[]): number {
         return samples[0].ramSize
+    }
+}
+
+export class TWMeasurePlain extends PWMeasure {
+    override displayValue(value: number): string {
+        return "" + Math.round(value);
     }
 }
