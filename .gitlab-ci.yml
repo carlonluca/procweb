@@ -6,7 +6,7 @@ variables:
 
 Build:
   image:
-    name: gitlab.pihome.lan:5050/opensource/procweb/builder:latest@sha256:03453ea163c4eab28e1f8d31cc8dece3764bbde2c5cd4fab33a571fffbb17701
+    name: gitlab.pihome.lan:5050/opensource/procweb/builder:latest@sha256:5866f58c2e50
     entrypoint: [""]
   stage: build
   artifacts:
