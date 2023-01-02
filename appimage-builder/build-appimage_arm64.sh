@@ -11,7 +11,7 @@ cd .. && \
 cd procweb-qt && \
 mkdir build && \
 cd build && \
-/opt/Qt-arm64-6.4.0/bin/qt-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr && \
+/opt/Qt-arm64-6.4.1/bin/qt-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr && \
 make && \
 make install DESTDIR=AppDir && \
 mkdir -p AppDir/usr/share/icons && \

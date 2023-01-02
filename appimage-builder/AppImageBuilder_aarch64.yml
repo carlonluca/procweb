@@ -4,8 +4,8 @@ AppDir:
   path: /root/procweb/procweb-qt/build/AppDir
   runtime:
     env:
-      QT_PLUGIN_PATH: '${APPDIR}/opt/Qt-arm64-6.4.0/plugins'
-      APPDIR_LIBRARY_PATH: '$APPDIR/lib/aarch64-linux-gnu:$APPDIR/usr/lib/aarch64-linux-gnu:$APPDIR/opt/Qt-arm64-6.4.0/lib'
+      QT_PLUGIN_PATH: '${APPDIR}/opt/Qt-arm64-6.4.1/plugins'
+      APPDIR_LIBRARY_PATH: '$APPDIR/lib/aarch64-linux-gnu:$APPDIR/usr/lib/aarch64-linux-gnu:$APPDIR/opt/Qt-arm64-6.4.1/lib'
   app_info:
     id: procweb
     name: procweb
@@ -38,9 +38,9 @@ AppDir:
     include:
     - /lib/aarch64-linux-gnu/libcrypto.so
     - /lib/aarch64-linux-gnu/libssl.so
-    - /opt/Qt-arm64-6.4.0/lib/libQt6HttpServer.so.6
-    - /opt/Qt-arm64-6.4.0/plugins/tls/libqcertonlybackend.so
-    - /opt/Qt-arm64-6.4.0/plugins/tls/libqopensslbackend.so
+    - /opt/Qt-arm64-6.4.1/lib/libQt6HttpServer.so.6
+    - /opt/Qt-arm64-6.4.1/plugins/tls/libqcertonlybackend.so
+    - /opt/Qt-arm64-6.4.1/plugins/tls/libqopensslbackend.so
     exclude:
     - usr/share/man
     - usr/share/doc/*/README.*
