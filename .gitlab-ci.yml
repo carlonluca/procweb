@@ -11,7 +11,7 @@ Build:
   stage: build
   artifacts:
     paths:
-      - procweb-qt/build/procweb-1.0.0-x64.AppImage
+      - procweb-qt/build/procweb-1.0.0-x86_64.AppImage
   script:
     - cd procweb-webui
     - ./build.sh
