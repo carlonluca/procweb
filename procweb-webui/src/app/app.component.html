@@ -25,7 +25,7 @@
  -->
 
 <section class="mat-typography page-element">
-    <h1 class="mat-headline-2">procweb-webui</h1>
+    <br/>
     <div class="center-container">Recording time: {{ sampledTime }}</div>
 
     <div class="center-container">
@@ -63,14 +63,6 @@
 
     <br />
 
-    <div id="buttonContainer">
-        <button mat-flat-button (click)="clearSamples()" color="warn">Clear samples</button>
-        <button mat-flat-button (click)="createCsv()" class="buttonLeft">Download CSV</button>
-        <button mat-flat-button (click)="createChartImage()" class="buttonLeft">Download Chart</button>
-    </div>
-
-    <br/>
-
     <div class="center-container">
         <mat-label>X axis range:</mat-label>
         <mat-form-field class="inline-comp" appearance="fill">
@@ -88,6 +80,14 @@
     </div>
 
     <br />
+
+    <div id="buttonContainer">
+        <button mat-raised-button (click)="clearSamples()" color="warn">Clear samples</button>
+        <button mat-raised-button (click)="createCsv()" class="buttonLeft">Download CSV</button>
+        <button mat-raised-button (click)="createChartImage()" class="buttonLeft">Download Chart</button>
+    </div>
+
+    <br/>
 
     <div class="center-container">
         {{ procData }}
@@ -116,5 +116,5 @@
         {{ this.sampleTableTime }}
     </div>
 
-    <br />
+    <br/>
 </section>
