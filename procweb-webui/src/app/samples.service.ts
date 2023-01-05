@@ -75,6 +75,10 @@ export class SamplesService {
         })
     }
 
+    requestClearSamples() {
+        this.http.delete("/api/samples").subscribe()
+    }
+
     private getSetup() {
         return this.http.get<Setup>("/api/setup")
     }

@@ -337,6 +337,10 @@ export class AppComponent {
         })
     }
 
+    clearSamples() {
+        this.sampleService.requestClearSamples()
+    }
+
     onChartInit(ec: any) {
         this.chartInstance = ec
     }

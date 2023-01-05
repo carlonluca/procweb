@@ -47,6 +47,7 @@ public:
     explicit PWSampler(int pid, QObject* parent = nullptr);
 
     QList<PWSampleRef> samples() const { return m_samples; }
+    void clearSamples();
 
 private slots:
     void acquireSample();

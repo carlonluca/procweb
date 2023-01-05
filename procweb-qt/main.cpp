@@ -25,6 +25,7 @@
 #include <QCoreApplication>
 #include <QtHttpServer>
 #include <QHttpServerResponse>
+#include <QHttpServerRouterRule>
 #include <QJsonObject>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
@@ -83,7 +84,7 @@ int main(int argc, char** argv)
 
     PWSampler sampler(pid);
     QHttpServer httpServer;
-    httpServer.route("/api/samples", [&sampler] (const QUrl& url) {
+    httpServer.route("/api/samples", QHttpServerRequest::Method::Get, [&sampler] (const QUrl& url) {
         QList<PWSampleRef> samples = sampler.samples();
         QJsonArray response;
         LSerializer s;
@@ -93,6 +94,10 @@ int main(int argc, char** argv)
         return QHttpServerResponse(QByteArray("application/json"),
                                    QJsonDocument(response).toJson(QJsonDocument::Compact),
                                    QHttpServerResponse::StatusCode::Ok);
+    });
+    httpServer.route("/api/samples", QHttpServerRequest::Method::Delete, [&sampler] (const QUrl& url) {
+        sampler.clearSamples();
+        return QHttpServerResponse(QHttpServerResponse::StatusCode::Ok);
     });
     httpServer.route("/api/setup", [&sampler, &pid] (const QUrl& url) {
         PWSetup setup;

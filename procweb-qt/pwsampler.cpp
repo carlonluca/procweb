@@ -65,6 +65,11 @@ PWSampler::PWSampler(int pid, QObject* parent) :
         m_samplerTimer->start();
 }
 
+void PWSampler::clearSamples()
+{
+    m_samples.clear();
+}
+
 void PWSampler::acquireSample()
 {
     // CPU
