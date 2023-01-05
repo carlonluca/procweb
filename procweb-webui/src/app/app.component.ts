@@ -26,9 +26,11 @@ import { Component } from '@angular/core'
 import { EChartsOption } from 'echarts'
 import { first } from 'rxjs'
 import { PWMeasure, PWMeasureCpu, PWMwasureRss, TWMeasurePlain } from './measure'
-import { HumanizeDurationLanguage, HumanizeDuration } from 'humanize-duration-ts';
+import { HumanizeDurationLanguage, HumanizeDuration } from 'humanize-duration-ts'
 import { Setup, Sample, SamplesService, TimeUom } from './samples.service'
+import { DialogYesNoComponent } from './dialog-yes-no/dialog-yes-no.component'
 import { saveAs } from 'file-saver'
+import { MatDialog } from '@angular/material/dialog'
 import * as csv from 'csv-writer/web'
 import prettyBytes from 'pretty-bytes'
 
@@ -134,7 +136,7 @@ export class AppComponent {
 
     chartInstance: any = null
 
-    constructor(private sampleService: SamplesService) { }
+    constructor(private sampleService: SamplesService, public dialog: MatDialog) { }
 
     ngOnInit() {
         this.sampleService.setup.subscribe((data: Setup) => {
@@ -338,7 +340,11 @@ export class AppComponent {
     }
 
     clearSamples() {
-        this.sampleService.requestClearSamples()
+        let dialogRef = this.dialog.open(DialogYesNoComponent)
+        dialogRef.afterClosed().subscribe(result => {
+            if (result == "true")
+                this.sampleService.requestClearSamples()
+        })
     }
 
     onChartInit(ec: any) {

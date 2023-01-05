@@ -36,11 +36,14 @@ import { MatTableModule } from '@angular/material/table'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
 import { MatButtonModule } from '@angular/material/button'
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
+import { MatDialogModule } from '@angular/material/dialog'
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { DialogYesNoComponent } from './dialog-yes-no/dialog-yes-no.component'
 
 @NgModule({
    declarations: [
-      AppComponent
+      AppComponent,
+      DialogYesNoComponent
    ],
    imports: [
       BrowserModule,
@@ -55,6 +58,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome'
       MatInputModule,
       MatTableModule,
       MatButtonModule,
+      MatDialogModule,
       FontAwesomeModule,
       NgxEchartsModule.forRoot({
          /**
