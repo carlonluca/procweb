@@ -36,6 +36,10 @@ impl PWSampler {
         }));
     }
 
+    pub fn samples(&self) -> Arc<Mutex<Vec<PWSample>>> {
+        self.samples.clone()
+    }
+
     // Private portion
     // ===============
     fn acquire_sample() -> PWSample {

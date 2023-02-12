@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 #[derive(Debug)]
+#[derive(Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PWSample {
     pub ts: i64,

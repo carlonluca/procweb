@@ -1,13 +1,18 @@
+use std::sync::Arc;
+use std::sync::Mutex;
+
 use actix_web::{get, web, App, HttpServer, Responder};
 use log::{debug, error, log_enabled, info, Level};
+use pwsampler::PWSampler;
 mod pwsampler;
 mod pwdata;
 
-
-#[get("/hello/{name}")]
-async fn greet(name: web::Path<String>) -> impl Responder {
-    let sample: pwdata::PWSample = pwdata::PWSample::default();
-    web::Json(sample)
+#[get("/api/samples")]
+async fn getSamples(data: web::Data<Arc<Mutex<PWSampler>>>) -> impl Responder {
+    let samples = data.lock().unwrap().samples();
+    let _samples = samples.lock().unwrap();
+    let __samples = &*_samples;
+    web::Json(__samples.clone())
 }
 
 ///
@@ -20,11 +25,11 @@ async fn main() -> std::io::Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
     log::info!("Version {}", VERSION);
 
-    let mut sampler = pwsampler::PWSampler::new();
-    sampler.start();
+    let sampler = Arc::new(Mutex::new(pwsampler::PWSampler::new()));
+    sampler.lock().unwrap().start();
 
-    HttpServer::new(|| {
-        App::new().service(greet)
+    HttpServer::new(move || {
+        App::new().app_data(sampler.clone()).service(getSamples)
     })
     .bind(("127.0.0.1", 3000))?
     .run()
