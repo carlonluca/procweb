@@ -2,7 +2,6 @@ use std::thread;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::sync::{Arc, Mutex};
-use std::rc::Rc;
 use sysinfo::{System, SystemExt, CpuExt};
 use log;
 use crate::pwdata::PWSample;
@@ -16,10 +15,10 @@ pub struct PWSampler {
 }
 
 impl PWSampler {
-    pub fn new() -> PWSampler {
-        log::info!("Start");
+    pub fn new(pid: i64) -> PWSampler {
+        log::info!("Sampler started");
         PWSampler {
-            pid: 0,
+            pid: pid,
             thread_handle: None,
             samples: Arc::new(Mutex::new(Vec::new()))
         }
