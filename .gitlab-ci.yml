@@ -1,14 +1,15 @@
 stages:
-  - build
+  - build_qt
+  - build_rust
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
-Build:
+Build-Qt:
   image:
     name: gitlab.pihome.lan:5050/opensource/procweb/builder:latest
     entrypoint: [""]
-  stage: build
+  stage: build_qt
   artifacts:
     paths:
       - procweb-qt/build/procweb-1.0.0-x86_64.AppImage
@@ -27,3 +28,11 @@ Build:
     - pip3 uninstall appimage-builder --yes
     - pip3 install git+https://github.com/carlonluca/appimage-builder.git@aarch64-fix
     - appimage-builder --recipe ../../appimage-builder/AppImageBuilder_x64.yml
+
+Build-Rust:
+  image:
+    name: rust:1.67-bullseye
+  stage: build_rust
+  script:
+    - cd procweb-rust
+    - cargo build
