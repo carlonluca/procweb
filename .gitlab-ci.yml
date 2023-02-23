@@ -7,7 +7,7 @@ variables:
 
 Build-Qt:
   image:
-    name: gitlab.pihome.lan:5050/opensource/procweb/builder:latest
+    name: carlonluca/procweb-ci:latest
     entrypoint: [""]
   stage: build_qt
   artifacts:
