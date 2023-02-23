@@ -4,6 +4,7 @@ use clap::Parser;
 use actix_web::{get, web, App, HttpServer, Responder};
 use pwsampler::PWSampler;
 mod pwsampler;
+mod pwreader;
 mod pwdata;
 
 #[derive(Parser, Debug)]

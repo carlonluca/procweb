@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex};
 use sysinfo::{System, SystemExt, CpuExt};
 use log;
 use crate::pwdata::PWSample;
+use crate::pwreader::PWReader;
 extern crate timer;
 extern crate chrono;
 
@@ -32,7 +33,7 @@ impl PWSampler {
             loop {
                 {
                     let mut data = samples.lock().unwrap();
-                    (*data).push(PWSampler::acquire_sample(&mut sys));
+                    (*data).push(PWSampler::acquire_sample());
                 }
                 
                 sleep(Duration::from_secs(1));
@@ -46,7 +47,7 @@ impl PWSampler {
 
     // Private portion
     // ===============
-    fn acquire_sample(sys: &mut System) -> PWSample {
+    fn acquire_sample_systemcrate(sys: &mut System) -> PWSample {
         let now = SystemTime::now();
         let ts = match now.duration_since(UNIX_EPOCH) {
             Ok(d) => d,
@@ -70,5 +71,9 @@ impl PWSampler {
 
         log::info!("Sample: {:?}", def);
         def
+    }
+
+    fn acquire_sample() -> PWSample {
+        
     }
 }
