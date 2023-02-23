@@ -33,7 +33,7 @@ impl PWSampler {
             loop {
                 {
                     let mut data = samples.lock().unwrap();
-                    (*data).push(PWSampler::acquire_sample());
+                    (*data).push(PWSampler::acquire_sample(self.pid));
                 }
                 
                 sleep(Duration::from_secs(1));
@@ -73,7 +73,18 @@ impl PWSampler {
         def
     }
 
-    fn acquire_sample() -> PWSample {
-        
+    fn acquire_sample(pid: i64) -> Option<PWSample> {
+        let sample = PWSample::default();
+        let proc_stat_content = PWReader::read_proc_stat(pid);
+        let proc_stat_lines;
+        match proc_stat_content {
+            None => return None,
+            Some(content) => {
+                proc_stat_lines = content.split(" ");
+            }
+        }
+
+        log::info!("Sample: {:?}", sample);
+        Some(sample)
     }
 }
