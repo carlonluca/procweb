@@ -27,13 +27,16 @@ impl PWSampler {
 
     pub fn start(&mut self) {
         let samples = self.samples.clone();
+        let pid = self.pid;
         self.thread_handle = Some(thread::spawn(move || {
             // some work here
-            let mut sys = System::new_all();
             loop {
                 {
                     let mut data = samples.lock().unwrap();
-                    (*data).push(PWSampler::acquire_sample(self.pid));
+                    match PWSampler::acquire_sample(pid) {
+                        Some(sample) => (*data).push(sample),
+                        None => {}
+                    };
                 }
                 
                 sleep(Duration::from_secs(1));
@@ -76,15 +79,46 @@ impl PWSampler {
     fn acquire_sample(pid: i64) -> Option<PWSample> {
         let sample = PWSample::default();
         let proc_stat_content = PWReader::read_proc_stat(pid);
-        let proc_stat_lines;
+        let mut proc_stat_lines;
+        let mut _proc_stat_content;
         match proc_stat_content {
             None => return None,
             Some(content) => {
-                proc_stat_lines = content.split(" ");
+                _proc_stat_content = content;
+                proc_stat_lines = _proc_stat_content.split(" ");
             }
-        }
+        };
 
-        log::info!("Sample: {:?}", sample);
+        let proc_uptime = match proc_stat_lines.nth(13)
+            .unwrap_or("0")
+            .parse::<u64>() {
+                Ok(v) => v,
+                Err(e) => {
+                    log::warn!("Failed to parse proc stats");
+                    return None
+                }
+        };
+        let proc_stime = match proc_stat_lines.nth(14)
+            .unwrap_or("0")
+            .parse::<u64>() {
+                Ok(v) => v,
+                Err(e) => {
+                    log::warn!("Failed to parse proc stats");
+                    return None
+                }
+        };
+        let proc_start_time = match proc_stat_lines.nth(21)
+            .unwrap_or("0")
+            .parse::<u64>() {
+                Ok(v) => v,
+                Err(e) => {
+                    log::warn!("Failed to parse proc stats");
+                    return None
+                }
+        };
+
+        let proc_usage_ticks = proc_uptime + proc_stime;
+        
         Some(sample)
     }
 }
