@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::io::Error;
 
 pub struct PWReader {}
 
@@ -16,23 +17,28 @@ impl PWReader {
         Path::new(&Self::proc_dir(pid)).join("io")
     }
 
-    pub fn read_cmd_line(pid: i64) -> Option<String> {
+    pub fn read_cmd_line(pid: i64) -> Result<String, Error> {
         Self::read_file(Path::new(&Self::proc_dir(pid)).join("cmdline"),
             "cmd_line")
     }
 
-    pub fn read_proc_stat(pid: i64) -> Option<String> {
+    pub fn read_proc_stat(pid: i64) -> Result<String, Error> {
         Self::read_file(Path::new(&Self::proc_stat_dir(pid)).to_path_buf(),
             "stat")
     }
 
-    fn read_file(file_path: PathBuf, name: &str) -> Option<String> {
+    pub fn read_stat() -> Result<String, Error> {
+        Self::read_file(Path::new("/proc/stat").to_path_buf(),
+            "proc stat")
+    }
+
+    fn read_file(file_path: PathBuf, name: &str) -> Result<String, Error> {
         let file_content = fs::read_to_string(file_path);
         match file_content {
-            Ok(content) => Some(content),
+            Ok(content) => Ok(content),
             Err(e) => {
                 log::warn!("Failed to read {}: {}", name, e);
-                None
+                Err(e)
             }
         }
     }

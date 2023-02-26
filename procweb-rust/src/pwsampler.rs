@@ -2,12 +2,18 @@ use std::thread;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::sync::{Arc, Mutex};
+use std::iter::Enumerate;
 use sysinfo::{System, SystemExt, CpuExt};
 use log;
 use crate::pwdata::PWSample;
 use crate::pwreader::PWReader;
 extern crate timer;
 extern crate chrono;
+
+pub struct PWSamplerData {
+    pub last_cpu_time: u64,
+    pub last_proc_cpu_time: u64
+}
 
 pub struct PWSampler {
     pid: i64,
@@ -29,12 +35,18 @@ impl PWSampler {
         let samples = self.samples.clone();
         let pid = self.pid;
         self.thread_handle = Some(thread::spawn(move || {
-            // some work here
+            let mut state = PWSamplerData {
+                last_cpu_time: 0,
+                last_proc_cpu_time: 0
+            };
             loop {
                 {
                     let mut data = samples.lock().unwrap();
-                    match PWSampler::acquire_sample(pid) {
-                        Some(sample) => (*data).push(sample),
+                    match PWSampler::acquire_sample(pid, &mut state) {
+                        Some(sample) => {
+                            log::info!("Sample: {:?}", sample);
+                            (*data).push(sample)
+                        },
                         None => {}
                     };
                 }
@@ -76,14 +88,14 @@ impl PWSampler {
         def
     }
 
-    fn acquire_sample(pid: i64) -> Option<PWSample> {
-        let sample = PWSample::default();
+    fn acquire_sample(pid: i64, current_state: &mut PWSamplerData) -> Option<PWSample> {
+        let mut sample = PWSample::default();
         let proc_stat_content = PWReader::read_proc_stat(pid);
         let mut proc_stat_lines;
         let mut _proc_stat_content;
         match proc_stat_content {
-            None => return None,
-            Some(content) => {
+            Err(e) => return None,
+            Ok(content) => {
                 _proc_stat_content = content;
                 proc_stat_lines = _proc_stat_content.split(" ");
             }
@@ -112,13 +124,55 @@ impl PWSampler {
             .parse::<u64>() {
                 Ok(v) => v,
                 Err(e) => {
-                    log::warn!("Failed to parse proc stats");
+                    log::warn!("Failed to parse proc stats: {}", e);
                     return None
                 }
         };
 
         let proc_usage_ticks = proc_uptime + proc_stime;
+        let stat_content = match PWReader::read_stat() {
+            Ok(content) => content,
+            Err(e) => {
+                log::warn!("Failed to read stat file: {}", e);
+                return None;
+            }
+        };
+        let stat_content = stat_content.trim();
+        let mut stat_lines = stat_content
+            .split("\n")
+            .filter(|&x| !x.is_empty());
+        let stat_values: Vec<&str> = stat_lines.nth(0)
+            .unwrap_or("")
+            .split(" ")
+            .filter(|&x| !x.is_empty())
+            .collect();
+        //let stat_values_iterator = stat_values.enumerate();
+        //if stat_values_iterator.count() <= 0 {
+        //    log::warn!("Failed to parse cpu stats file");
+        //    return None;
+        //}
+
+        let mut cpu_time: u64 = 0;
+        for val_str in stat_values {
+            cpu_time += val_str.parse::<u64>().unwrap_or(0u64);
+        }
+
+        if current_state.last_cpu_time < 0 || current_state.last_proc_cpu_time < 0 {
+            current_state.last_cpu_time = cpu_time;
+            current_state.last_proc_cpu_time = proc_usage_ticks;
+            return None
+        }
         
+        let cpu: f64 = if cpu_time - current_state.last_cpu_time == 0 {
+            0f64
+        }
+        else {
+            (proc_usage_ticks - current_state.last_proc_cpu_time) as f64/
+                (cpu_time - current_state.last_cpu_time) as f64
+        };
+
+        sample.cpu = cpu;
+
         Some(sample)
     }
 }
