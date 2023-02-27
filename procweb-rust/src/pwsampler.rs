@@ -2,13 +2,15 @@ use std::thread;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::sync::{Arc, Mutex};
-use std::iter::Enumerate;
+use lazy_static::lazy_static;
+use regex::Regex;
 use sysinfo::{System, SystemExt, CpuExt};
 use log;
 use crate::pwdata::PWSample;
 use crate::pwreader::PWReader;
 extern crate timer;
 extern crate chrono;
+extern crate page_size;
 
 pub struct PWSamplerData {
     pub last_cpu_time: u64,
@@ -91,17 +93,17 @@ impl PWSampler {
     fn acquire_sample(pid: i64, current_state: &mut PWSamplerData) -> Option<PWSample> {
         let mut sample = PWSample::default();
         let proc_stat_content = PWReader::read_proc_stat(pid);
-        let mut proc_stat_lines;
+        let mut proc_stat_values;
         let mut _proc_stat_content;
         match proc_stat_content {
             Err(e) => return None,
             Ok(content) => {
                 _proc_stat_content = content;
-                proc_stat_lines = _proc_stat_content.split(" ");
+                proc_stat_values = _proc_stat_content.split(" ");
             }
         };
 
-        let proc_uptime = match proc_stat_lines.nth(13)
+        let proc_uptime = match proc_stat_values.nth(13)
             .unwrap_or("0")
             .parse::<u64>() {
                 Ok(v) => v,
@@ -110,7 +112,7 @@ impl PWSampler {
                     return None
                 }
         };
-        let proc_stime = match proc_stat_lines.nth(14)
+        let proc_stime = match proc_stat_values.nth(14)
             .unwrap_or("0")
             .parse::<u64>() {
                 Ok(v) => v,
@@ -119,7 +121,7 @@ impl PWSampler {
                     return None
                 }
         };
-        let proc_start_time = match proc_stat_lines.nth(21)
+        let proc_start_time = match proc_stat_values.nth(21)
             .unwrap_or("0")
             .parse::<u64>() {
                 Ok(v) => v,
@@ -146,18 +148,13 @@ impl PWSampler {
             .split(" ")
             .filter(|&x| !x.is_empty())
             .collect();
-        //let stat_values_iterator = stat_values.enumerate();
-        //if stat_values_iterator.count() <= 0 {
-        //    log::warn!("Failed to parse cpu stats file");
-        //    return None;
-        //}
 
         let mut cpu_time: u64 = 0;
         for val_str in stat_values {
             cpu_time += val_str.parse::<u64>().unwrap_or(0u64);
         }
 
-        if current_state.last_cpu_time < 0 || current_state.last_proc_cpu_time < 0 {
+        if current_state.last_cpu_time <= 0 || current_state.last_proc_cpu_time <= 0 {
             current_state.last_cpu_time = cpu_time;
             current_state.last_proc_cpu_time = proc_usage_ticks;
             return None
@@ -171,8 +168,48 @@ impl PWSampler {
                 (cpu_time - current_state.last_cpu_time) as f64
         };
 
+        // RSS
+        let mut rss: u64 = 0;
+        let proc_stat_values_collection: Vec<&str> = proc_stat_values.collect();
+        if proc_stat_values_collection.len() > 23 {
+            let page_size = page_size::get();
+            rss = proc_stat_values_collection.get(23)
+                .unwrap_or(&"0")
+                .parse::<u64>()
+                .unwrap_or(0u64)*(page_size as u64);
+        }
+
+        // Total mem
+        let total_mem = Self::read_total_mem();
+
         sample.cpu = cpu;
+        sample.ts = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or(Duration::new(0, 0)).as_millis() as i64;
+        sample.ram_size = match total_mem {
+            None => 0,
+            Some(v) => v as i64
+        };
 
         Some(sample)
+    }
+
+    fn read_total_mem() -> Option<u64> {
+        lazy_static! {
+            static ref RE: Regex = Regex::new("MemTotal:\\s+(\\d+)\\s+kB").unwrap();
+        }
+
+        let meminfo_content = match PWReader::read_meminfo() {
+            Err(_) => return None,
+            Ok(content) => content
+        };
+
+        log::debug!("{}", meminfo_content);
+
+        for cap in RE.captures_iter(&meminfo_content) {
+            return Some(cap[1].parse::<u64>().unwrap_or(0u64)*1024u64);
+        }
+
+        None
     }
 }

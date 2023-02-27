@@ -32,6 +32,11 @@ impl PWReader {
             "proc stat")
     }
 
+    pub fn read_meminfo() -> Result<String, Error> {
+        Self::read_file(Path::new("/proc/meminfo").to_path_buf(),
+            "meminfo")
+    }
+
     fn read_file(file_path: PathBuf, name: &str) -> Result<String, Error> {
         let file_content = fs::read_to_string(file_path);
         match file_content {

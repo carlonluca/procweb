@@ -13,3 +13,6 @@ serde = { version = "1.0.126", features = ["derive"] }
 timer = "0.2.0"
 chrono = "0.4.23"
 clap = { version = "4.1.6", features = ["derive"] }
+page_size = "0.5.0"
+lazy_static = "1.4.0"
+regex = "1"
