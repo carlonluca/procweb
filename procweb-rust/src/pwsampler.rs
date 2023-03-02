@@ -1,3 +1,4 @@
+use std::ops::{Sub, Add};
 use std::thread;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -5,12 +6,14 @@ use std::sync::{Arc, Mutex};
 use lazy_static::lazy_static;
 use regex::Regex;
 use sysinfo::{System, SystemExt, CpuExt};
+use chrono::{DateTime, Utc, SecondsFormat};
 use log;
 use crate::pwdata::PWSample;
 use crate::pwreader::PWReader;
 extern crate timer;
 extern crate chrono;
 extern crate page_size;
+extern crate sysconf;
 
 pub struct PWSamplerData {
     pub last_cpu_time: u64,
@@ -93,18 +96,31 @@ impl PWSampler {
     fn acquire_sample(pid: i64, current_state: &mut PWSamplerData) -> Option<PWSample> {
         let mut sample = PWSample::default();
         let proc_stat_content = PWReader::read_proc_stat(pid);
-        let mut proc_stat_values;
+        let proc_stat_values;
         let mut _proc_stat_content;
         match proc_stat_content {
-            Err(e) => return None,
+            Err(e) => {
+                log::warn!("Failed to process process stat: {}", e);
+                return None
+            },
             Ok(content) => {
                 _proc_stat_content = content;
                 proc_stat_values = _proc_stat_content.split(" ");
             }
         };
+        let proc_stat_values: Vec<&str> = proc_stat_values.collect();
 
-        let proc_uptime = match proc_stat_values.nth(13)
-            .unwrap_or("0")
+        let proc_uptime = match proc_stat_values.get(13)
+            .unwrap_or(&"0")
+            .parse::<u64>() {
+                Ok(v) => v,
+                Err(e) => {
+                    log::warn!("Failed to parse proc stats: {}", e);
+                    return None
+                }
+        };
+        let proc_stime = match proc_stat_values.get(14)
+            .unwrap_or(&"0")
             .parse::<u64>() {
                 Ok(v) => v,
                 Err(e) => {
@@ -112,17 +128,8 @@ impl PWSampler {
                     return None
                 }
         };
-        let proc_stime = match proc_stat_values.nth(14)
-            .unwrap_or("0")
-            .parse::<u64>() {
-                Ok(v) => v,
-                Err(e) => {
-                    log::warn!("Failed to parse proc stats");
-                    return None
-                }
-        };
-        let proc_start_time = match proc_stat_values.nth(21)
-            .unwrap_or("0")
+        let proc_start_time = match proc_stat_values.get(21)
+            .unwrap_or(&"0")
             .parse::<u64>() {
                 Ok(v) => v,
                 Err(e) => {
@@ -169,23 +176,82 @@ impl PWSampler {
         };
 
         // RSS
-        let mut rss: u64 = 0;
-        let proc_stat_values_collection: Vec<&str> = proc_stat_values.collect();
-        if proc_stat_values_collection.len() > 23 {
-            let page_size = page_size::get();
-            rss = proc_stat_values_collection.get(23)
-                .unwrap_or(&"0")
-                .parse::<u64>()
-                .unwrap_or(0u64)*(page_size as u64);
-        }
+        let page_size = page_size::get();
+        let rss: u64 = proc_stat_values.get(23)
+            .unwrap_or(&"0")
+            .parse::<u64>()
+            .unwrap_or(0u64)*(page_size as u64);
 
         // Total mem
         let total_mem = Self::read_total_mem();
 
+        // Num threads
+        let num_threads  = proc_stat_values
+            .get(19)
+            .unwrap_or(&"0")
+            .parse::<i64>()
+            .unwrap_or(0);
+
+        // Niceness
+        let niceness  = proc_stat_values
+            .get(18)
+            .unwrap_or(&"0")
+            .parse::<i64>()
+            .unwrap_or(0);
+
+        // State
+        let state = proc_stat_values
+            .get(2)
+            .unwrap_or(&"");
+
+        // Virtual size
+        let vsize = proc_stat_values
+            .get(22)
+            .unwrap_or(&"0")
+            .parse::<i64>()
+            .unwrap_or(0i64);
+
+        // Start
+        let clock_tick = match sysconf::raw::sysconf(sysconf::raw::SysconfVariable::ScClkTck) {
+            Err(e) => {
+                log::warn!("Could not retrieve clock tick: {:?}", e);
+                0i64
+            },
+            Ok(v) => v as i64
+        };
+        let start_time_ms = ((proc_stat_values
+            .get(21)
+            .unwrap_or(&"0")
+            .parse::<i64>()
+            .unwrap_or(0i64) as f64)/(clock_tick as f64)*1000f64).round() as u64;
+
+        let uptime_ms = PWSampler::read_sys_uptime_millis();
+        let proc_uptime_ms = match uptime_ms {
+            None => 0,
+            Some(v) => v - start_time_ms
+        };
+        let start_time_proc = match uptime_ms {
+            None => String::new(),
+            Some(_) => {
+                let dt: DateTime<Utc> = SystemTime::now().sub(Duration::from_millis(proc_uptime_ms)).clone().into();
+                dt.to_rfc3339_opts(SecondsFormat::Secs, false)
+            }
+        };
+
         sample.cpu = cpu;
+        sample.num_threads = num_threads;
+        sample.nice = niceness;
+        sample.state = String::from(*state);
+        sample.vm_size = vsize;
+        sample.rss_size = rss as i64;
+        sample.uptime = match uptime_ms {
+            None => 0,
+            Some(v) => v as i64
+        };
         sample.ts = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap_or(Duration::new(0, 0)).as_millis() as i64;
+        sample.start_time = start_time_proc;
         sample.ram_size = match total_mem {
             None => 0,
             Some(v) => v as i64
@@ -204,12 +270,29 @@ impl PWSampler {
             Ok(content) => content
         };
 
-        log::debug!("{}", meminfo_content);
-
         for cap in RE.captures_iter(&meminfo_content) {
             return Some(cap[1].parse::<u64>().unwrap_or(0u64)*1024u64);
         }
 
         None
+    }
+
+    fn read_sys_uptime_millis() -> Option<u64> {
+        let content = match PWReader::read_uptime() {
+            Err(e) => return None,
+            Ok(v) => v
+        };
+
+        let tokens: Vec<&str> = content.split(" ").collect();
+        if tokens.len() != 2 {
+            log::warn!("Cannot parse /proc/uptime content");
+            return None
+        }
+
+        return Some((tokens
+            .get(0)
+            .unwrap_or(&"0")
+            .parse::<f64>()
+            .unwrap_or(0f64)*1000f64).round() as u64);
     }
 }

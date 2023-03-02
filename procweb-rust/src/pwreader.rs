@@ -37,6 +37,11 @@ impl PWReader {
             "meminfo")
     }
 
+    pub fn read_uptime() -> Result<String, Error> {
+        Self::read_file(Path::new("/proc/uptime").to_path_buf(),
+            "uptime")
+    }
+
     fn read_file(file_path: PathBuf, name: &str) -> Result<String, Error> {
         let file_content = fs::read_to_string(file_path);
         match file_content {
