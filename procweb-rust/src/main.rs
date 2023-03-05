@@ -8,15 +8,11 @@ use actix_web::{
     App,
     HttpServer,
     Responder,
-    HttpResponse,
-    http::{
-        StatusCode
-    }
+    HttpResponse
 };
 use pwsampler::PWSampler;
 use std::include_bytes;
 use std::collections::HashMap;
-use mime;
 mod pwsampler;
 mod pwreader;
 mod pwdata;
