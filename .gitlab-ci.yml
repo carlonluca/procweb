@@ -31,7 +31,8 @@ Build-Qt:
 
 Build-Rust:
   image:
-    name: rust:1.67-bullseye
+    name: carlonluca/procweb-ci:latest
+    entrypoint: [""]
   stage: build_rust
   script:
     - cd procweb-webui
