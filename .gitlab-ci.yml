@@ -34,5 +34,8 @@ Build-Rust:
     name: rust:1.67-bullseye
   stage: build_rust
   script:
+    - cd procweb-webui
+    - ./build.sh
+    - cd ..
     - cd procweb-rust
     - cargo build
