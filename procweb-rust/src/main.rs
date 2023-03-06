@@ -85,7 +85,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_samples)
             .service(get_web)
     })
-    .bind(("127.0.0.1", 3000))?
+    .bind(("127.0.0.1", 3001))?
     .run()
     .await
 }

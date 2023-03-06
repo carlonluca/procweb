@@ -230,28 +230,26 @@ impl PWSampler {
             None => 0,
             Some(v) => v - start_time_ms
         };
-        let start_time_proc = match uptime_ms {
-            None => String::new(),
-            Some(_) => {
-                let dt: DateTime<Utc> = SystemTime::now().sub(Duration::from_millis(proc_uptime_ms)).clone().into();
-                dt.to_rfc3339_opts(SecondsFormat::Secs, false)
-            }
-        };
+        log::info!("uptime: {}", proc_uptime_ms);
+        let start_time_proc: DateTime<Utc> = SystemTime::now()
+            .sub(Duration::from_millis(proc_uptime_ms))
+            .into();
 
+        sample.ts = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or(Duration::new(0, 0)).as_millis() as i64;
         sample.cpu = cpu;
         sample.num_threads = num_threads;
         sample.nice = niceness;
         sample.state = String::from(*state);
         sample.vm_size = vsize;
         sample.rss_size = rss as i64;
-        sample.uptime = match uptime_ms {
+        sample.uptime = proc_uptime_ms as i64;
+        sample.ram_size = match total_mem {
             None => 0,
             Some(v) => v as i64
         };
-        sample.ts = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or(Duration::new(0, 0)).as_millis() as i64;
-        sample.start_time = start_time_proc;
+        sample.start_time = start_time_proc.to_rfc3339_opts(SecondsFormat::Secs, false);
         sample.ram_size = match total_mem {
             None => 0,
             Some(v) => v as i64
