@@ -20,7 +20,10 @@ mod pwdata;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    pid: i64
+    pid: i64,
+    /// TCP port of the HTTP server
+    #[arg(short, long, default_value_t = 3000)]
+    port: u16
 }
 
 #[get("/api/samples")]
@@ -74,7 +77,6 @@ async fn main() -> std::io::Result<()> {
 
     const VERSION: &str = env!("CARGO_PKG_VERSION");
     log::info!("Version {}", VERSION);
-    log::info!("PID: {}", cli.pid);
 
     let sampler = Arc::new(Mutex::new(pwsampler::PWSampler::new(cli.pid)));
     sampler.lock().unwrap().start();
@@ -85,7 +87,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_samples)
             .service(get_web)
     })
-    .bind(("127.0.0.1", 3001))?
+    .bind(("127.0.0.1", cli.port))?
     .run()
     .await
 }
