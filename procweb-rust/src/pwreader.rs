@@ -42,6 +42,10 @@ impl PWReader {
             "uptime")
     }
 
+    pub fn read_proc_io(pid: i64) -> Result<String, Error> {
+        Self::read_file(Self::proc_io_dir(pid), "io")
+    }
+
     fn read_file(file_path: PathBuf, name: &str) -> Result<String, Error> {
         let file_content = fs::read_to_string(file_path);
         match file_content {

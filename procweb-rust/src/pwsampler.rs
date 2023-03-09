@@ -15,11 +15,15 @@ extern crate chrono;
 extern crate page_size;
 extern crate sysconf;
 
+pub struct PWIoValues {
+    pub read: u64,
+    pub written: u64
+}
+
 pub struct PWSamplerData {
     pub last_cpu_time: u64,
     pub last_proc_cpu_time: u64
 }
-
 pub struct PWSampler {
     pid: i64,
     thread_handle: Option<std::thread::JoinHandle<()>>,
@@ -254,6 +258,15 @@ impl PWSampler {
             None => 0,
             Some(v) => v as i64
         };
+        match Self::read_io_values(pid) {
+            None => {},
+            Some(v) => {
+                sample.read_all = v.1.read as i64;
+                sample.read_disk = v.0.read as i64;
+                sample.write_all = v.1.written as i64;
+                sample.write_disk = v.0.written as i64;
+            }
+        }
 
         Some(sample)
     }
@@ -292,5 +305,37 @@ impl PWSampler {
             .unwrap_or(&"0")
             .parse::<f64>()
             .unwrap_or(0f64)*1000f64).round() as u64);
+    }
+
+    fn read_io_values(pid: i64) -> Option<(PWIoValues, PWIoValues)> {
+        fn read_if_matches(regex: &Regex, pattern: &String) -> u64 {
+            match regex.captures(pattern) {
+                None => 0u64,
+                Some(v) => v.get(1).unwrap().as_str().parse::<u64>().unwrap_or(0u64)
+            }
+        }
+
+        let proc_io_content = match PWReader::read_proc_io(pid) {
+            Err(_) => return None,
+            Ok(v) => v
+        };
+
+        lazy_static! {
+            static ref REGEX_RBYTES: Regex = Regex::new(r"read_bytes:\s*(\d*)").unwrap();
+            static ref REGEX_WBYTES: Regex = Regex::new(r"write_bytes:\s*(\d*)").unwrap();
+            static ref REGEX_RCHAR: Regex = Regex::new(r"rchar:\s+(\d+)").unwrap();
+            static ref REGEX_WCHAR: Regex = Regex::new(r"wchar:\s+(\d+)").unwrap();
+        }
+
+        let disk = PWIoValues {
+            read: read_if_matches(&REGEX_RBYTES, &proc_io_content),
+            written: read_if_matches(&REGEX_WBYTES, &proc_io_content)
+        };
+        let all = PWIoValues {
+            read: read_if_matches(&REGEX_RCHAR, &proc_io_content),
+            written: read_if_matches(&REGEX_WCHAR, &proc_io_content)
+        };
+
+        Some((disk, all))
     }
 }
