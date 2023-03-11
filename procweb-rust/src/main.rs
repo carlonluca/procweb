@@ -34,6 +34,11 @@ async fn get_samples(data: web::Data<Arc<Mutex<PWSampler>>>) -> impl Responder {
     web::Json(__samples.clone())
 }
 
+#[get("/api/setup")]
+async fn get_setup(data: web::Data<Arc<Mutex<PWSampler>>>) -> impl Responder {
+    web::Json(data.lock().unwrap().setup())
+}
+
 #[get("/{filename:.*}")]
 async fn get_web(filename: web::Path<String>) -> HttpResponse {
     let res: HashMap<&str, &'static [u8]> = HashMap::from([
@@ -85,6 +90,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(sampler.clone()))
             .service(get_samples)
+            .service(get_setup)
             .service(get_web)
     })
     .bind(("127.0.0.1", cli.port))?

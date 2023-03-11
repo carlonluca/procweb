@@ -45,3 +45,13 @@ impl Default for PWSample {
         }
     }
 }
+
+#[derive(Serialize, Deserialize)]
+#[derive(Debug)]
+#[derive(Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PWSetup {
+    pub cmdline: String,
+    pub pid: i64,
+    pub sample_interval: i64
+}

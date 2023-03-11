@@ -1,3 +1,4 @@
+use std::f32::consts::E;
 use std::ops::{Sub, Add};
 use std::thread;
 use std::thread::sleep;
@@ -9,6 +10,7 @@ use sysinfo::{System, SystemExt, CpuExt};
 use chrono::{DateTime, Utc, SecondsFormat};
 use log;
 use crate::pwdata::PWSample;
+use crate::pwdata::PWSetup;
 use crate::pwreader::PWReader;
 extern crate timer;
 extern crate chrono;
@@ -67,6 +69,17 @@ impl PWSampler {
 
     pub fn samples(&self) -> Arc<Mutex<Vec<PWSample>>> {
         self.samples.clone()
+    }
+
+    pub fn setup(&self) -> PWSetup {
+        PWSetup {
+            cmdline: match PWReader::read_cmd_line(self.pid) {
+                Err(_) => "".to_string(),
+                Ok(v) => v
+            },
+            pid: self.pid,
+            sample_interval: 1000
+        }
     }
 
     // Private portion
