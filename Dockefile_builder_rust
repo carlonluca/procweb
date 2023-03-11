@@ -1,0 +1,17 @@
+FROM ubuntu:jammy
+RUN \
+    apt-get update \
+ && apt-get install -y curl \
+ && apt purge -y nodejs \
+ && dpkg --remove --force-remove-reinstreq libnode-dev \
+ && dpkg --remove --force-remove-reinstreq libnode72 \
+ && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+ && apt-get update \
+ && apt-get install -y nodejs \
+ && npm install -g @angular/cli \
+ && curl https://sh.rustup.rs -sSf | bash -s -- --default-toolchain=1.67.0 -y \
+ && apt-get install -y musl-dev \
+ && apt-get clean autoclean \
+ && apt-get -y autoremove \
+ && rm -rf /var/lib/{apt,dpkg,cache,log}
+ENV PATH="/root/.cargo/bin:${PATH}"

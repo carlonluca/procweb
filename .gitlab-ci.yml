@@ -31,12 +31,13 @@ Build-Qt:
 
 Build-Rust:
   image:
-    name: carlonluca/procweb-ci:latest
+    name: carlonluca/procweb-ci-rust:latest
     entrypoint: [""]
   stage: build_rust
   script:
+    - rustup target add x86_64-unknown-linux-musl
     - cd procweb-webui
     - ./build.sh
     - cd ..
     - cd procweb-rust
-    - cargo build
+    - cargo build --release --target=x86_64-unknown-linux-musl
