@@ -1,6 +1,7 @@
 stages:
   - build_qt
-  - build_rust
+  - build_rust_amd64
+  - build_rust_arm64
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -29,11 +30,14 @@ Build-Qt:
     - pip3 install git+https://github.com/carlonluca/appimage-builder.git@aarch64-fix
     - appimage-builder --recipe ../../appimage-builder/AppImageBuilder_x64.yml
 
-Build-Rust:
+Build-Rust amd64:
   image:
     name: carlonluca/procweb-ci-rust:latest
     entrypoint: [""]
-  stage: build_rust
+  stage: build_rust_amd64
+  artifacts:
+    paths:
+      - procweb-rust/target/x86_64-unknown-linux-musl/release/procweb-rust
   script:
     - rustup target add x86_64-unknown-linux-musl
     - cd procweb-webui
@@ -41,3 +45,19 @@ Build-Rust:
     - cd ..
     - cd procweb-rust
     - cargo build --release --target=x86_64-unknown-linux-musl
+
+Build-Rust arm64:
+  image:
+    name: carlonluca/procweb-ci-rust:latest@sha256:6003cf6ec314f006ffeb4d8179eb35c7319783b2e1d044c4c126c36a93f5c4c9
+    entrypoint: [""]
+  stage: build_rust_arm64
+  artifacts:
+    paths:
+      - procweb-rust/target/aarch64-unknown-linux-musl/release/procweb-rust
+  script:
+    - rustup target add aarch64-unknown-linux-musl
+    - cd procweb-webui
+    - ./build.sh
+    - cd ..
+    - cd procweb-rust
+    - cargo build --release --target=aarch64-unknown-linux-musl
