@@ -42,6 +42,7 @@ Build-Rust amd64:
   script:
     - rustup target add x86_64-unknown-linux-musl
     - ls -l /ramdisk
+    - cd procweb-webui
     - ./build.sh
     - cd ..
     - cd procweb-rust
