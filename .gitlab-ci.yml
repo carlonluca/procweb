@@ -56,6 +56,8 @@ Build-Rust arm64:
     paths:
       - procweb-rust/target/aarch64-unknown-linux-musl/release/procweb-rust
   script:
+    - export CARGO_CFG_WINDOWS=1
+    - ln -s /usr/bin/ar /usr/bin/aarch64-linux-musl-ar
     - rustup target add aarch64-unknown-linux-musl
     - cd procweb-webui
     - ./build.sh
