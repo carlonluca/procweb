@@ -36,6 +36,8 @@ Build-Rust amd64:
     name: carlonluca/procweb-ci-rust:latest
     entrypoint: [""]
   stage: build_rust_amd64
+  services:
+    - docker:dind
   artifacts:
     paths:
       - procweb-rust/target/x86_64-unknown-linux-musl/release/procweb-rust
