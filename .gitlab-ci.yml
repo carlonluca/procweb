@@ -49,6 +49,7 @@ Build-Rust amd64:
     - ./build.sh
     - cd ..
     - cd procweb-rust
+    - rm -f 386.js favicon.ico icon.svg index.html main.js polyfills.js runtime.js styles.css
     - yes | cp ../procweb-webui/dist/procweb-webui/* .
     - cargo build --release --target=x86_64-unknown-linux-musl
     - cargo install cross --git https://github.com/cross-rs/cross
