@@ -42,13 +42,13 @@ async fn get_setup(data: web::Data<Arc<Mutex<PWSampler>>>) -> impl Responder {
 #[get("/{filename:.*}")]
 async fn get_web(filename: web::Path<String>) -> HttpResponse {
     let res: HashMap<&str, &'static [u8]> = HashMap::from([
-        ("index.html", include_bytes!("../../procweb-webui/dist/procweb-webui/index.html") as &'static [u8]),
-        ("main.js", include_bytes!("../../procweb-webui/dist/procweb-webui/main.js")),
-        ("polyfills.js", include_bytes!("../../procweb-webui/dist/procweb-webui/polyfills.js")),
-        ("runtime.js", include_bytes!("../../procweb-webui/dist/procweb-webui/runtime.js")),
-        ("styles.css", include_bytes!("../../procweb-webui/dist/procweb-webui/styles.css")),
-        ("386.js", include_bytes!("../../procweb-webui/dist/procweb-webui/386.js")),
-        ("icon.svg", include_bytes!("../../icon.svg"))
+        ("index.html", include_bytes!("../index.html") as &'static [u8]),
+        ("main.js", include_bytes!("../main.js")),
+        ("polyfills.js", include_bytes!("../polyfills.js")),
+        ("runtime.js", include_bytes!("../runtime.js")),
+        ("styles.css", include_bytes!("../styles.css")),
+        ("386.js", include_bytes!("../386.js")),
+        ("icon.svg", include_bytes!("../icon.svg"))
     ]);
     let _filename = if filename.is_empty() {
         web::Path::from(String::from("index.html"))
