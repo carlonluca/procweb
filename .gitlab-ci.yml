@@ -1,8 +1,6 @@
 stages:
   - build_qt
-  - build_rust_amd64
-  - build_rust_arm64
-  - build_rust_armv7
+  - build_rust
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -35,7 +33,7 @@ Build-Rust amd64:
   image:
     name: carlonluca/procweb-ci-rust:latest
     entrypoint: [""]
-  stage: build_rust_amd64
+  stage: build_rust
   services:
     - docker:dind
   artifacts:
@@ -51,6 +49,7 @@ Build-Rust amd64:
     - cd procweb-rust
     - rm -f 386.js favicon.ico icon.svg index.html main.js polyfills.js runtime.js styles.css
     - cp ../procweb-webui/dist/procweb-webui/* .
+    - cp ../icon.svg .
     - cargo build --release --target=x86_64-unknown-linux-musl
     - cargo install cross --git https://github.com/cross-rs/cross
     - cross build --target aarch64-unknown-linux-musl
