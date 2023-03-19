@@ -54,6 +54,6 @@ Build-Rust amd64:
     - cp ../icon.svg .
     - cargo build --release --target=x86_64-unknown-linux-musl
     - cargo install cross --git https://github.com/cross-rs/cross
-    - cross build --target aarch64-unknown-linux-musl
-    - cross build --target armv7-unknown-linux-musleabihf
+    - cross build --release --target aarch64-unknown-linux-musl
+    - cross build --release --target armv7-unknown-linux-musleabihf
     - find .
