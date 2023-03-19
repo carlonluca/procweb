@@ -93,7 +93,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_setup)
             .service(get_web)
     })
-    .bind(("127.0.0.1", cli.port))?
+    .bind(("0.0.0.0", cli.port))?
     .run()
     .await
 }
