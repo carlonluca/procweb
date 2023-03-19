@@ -39,8 +39,8 @@ Build-Rust amd64:
   artifacts:
     paths:
       - procweb-rust/target/x86_64-unknown-linux-musl/release/procweb-rust
-      - procweb-rust/target/aarch64-unknown-linux-musl/release/procweb-rust
-      - procweb-rust/target/armv7-unknown-linux-musleabihf/release/procweb-rust
+      - procweb-rust/target/aarch64-unknown-linux-musl/debug/procweb-rust
+      - procweb-rust/target/armv7-unknown-linux-musleabihf/debug/procweb-rust
   script:
     - export CROSS_CONTAINER_IN_CONTAINER=true
     - export HOSTNAME=$(docker ps -ql)
@@ -54,6 +54,6 @@ Build-Rust amd64:
     - cp ../icon.svg .
     - cargo build --release --target=x86_64-unknown-linux-musl
     - cargo install cross --git https://github.com/cross-rs/cross
-    - cross build --release --target aarch64-unknown-linux-musl
-    - cross build --release --target armv7-unknown-linux-musleabihf
+    - cross build --target aarch64-unknown-linux-musl
+    - cross build --target armv7-unknown-linux-musleabihf
     - find .
