@@ -38,9 +38,7 @@ Build-Rust amd64:
     - docker:dind
   artifacts:
     paths:
-      - procweb-rust/target/x86_64-unknown-linux-musl/release/procweb-rust
-      - procweb-rust/target/aarch64-unknown-linux-musl/debug/procweb-rust
-      - procweb-rust/target/armv7-unknown-linux-musleabihf/debug/procweb-rust
+      - procweb-dist
   script:
     - export CROSS_CONTAINER_IN_CONTAINER=true
     - export HOSTNAME=$(docker ps -ql)
@@ -53,9 +51,15 @@ Build-Rust amd64:
     - cp ../procweb-webui/dist/procweb-webui/* .
     - cp ../icon.svg .
     - cargo build --release --target=x86_64-unknown-linux-musl
+    - mkdir -p ../procweb-dist/x86_64-unknown-linux-musl
+    - mv procweb-rust/target/x86_64-unknown-linux-musl/release/procweb-rust ../procweb-dist/x86_64-unknown-linux-musl/
     - cargo clean
     - cargo install cross --git https://github.com/cross-rs/cross
     - cross build --release --target aarch64-unknown-linux-musl
+    - mkdir -p ../procweb-dist/aarch64-unknown-linux-musl
+    - mv procweb-rust/target/aarch64-unknown-linux-musl/release/procweb-rust ../procweb-dist/aarch64-unknown-linux-musl/
     - cargo clean
     - cross build --release --target armv7-unknown-linux-musleabihf
-    - find .
+    - mkdir -p ../procweb-dist/armv7-unknown-linux-musleabihf
+    - mv procweb-rust/target/armv7-unknown-linux-musleabihf/release/procweb-rust ../procweb-dist/armv7-unknown-linux-musleabihf/
+    - find ..
