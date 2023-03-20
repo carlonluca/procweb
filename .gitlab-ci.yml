@@ -52,14 +52,14 @@ Build-Rust amd64:
     - cp ../icon.svg .
     - cargo build --release --target=x86_64-unknown-linux-musl
     - mkdir -p ../procweb-dist/x86_64-unknown-linux-musl
-    - mv procweb-rust/target/x86_64-unknown-linux-musl/release/procweb-rust ../procweb-dist/x86_64-unknown-linux-musl/
+    - mv target/x86_64-unknown-linux-musl/release/procweb-rust ../procweb-dist/x86_64-unknown-linux-musl/
     - cargo clean
     - cargo install cross --git https://github.com/cross-rs/cross
     - cross build --release --target aarch64-unknown-linux-musl
     - mkdir -p ../procweb-dist/aarch64-unknown-linux-musl
-    - mv procweb-rust/target/aarch64-unknown-linux-musl/release/procweb-rust ../procweb-dist/aarch64-unknown-linux-musl/
+    - mv target/aarch64-unknown-linux-musl/release/procweb-rust ../procweb-dist/aarch64-unknown-linux-musl/
     - cargo clean
     - cross build --release --target armv7-unknown-linux-musleabihf
     - mkdir -p ../procweb-dist/armv7-unknown-linux-musleabihf
-    - mv procweb-rust/target/armv7-unknown-linux-musleabihf/release/procweb-rust ../procweb-dist/armv7-unknown-linux-musleabihf/
+    - mv target/armv7-unknown-linux-musleabihf/release/procweb-rust ../procweb-dist/armv7-unknown-linux-musleabihf/
     - find ..
