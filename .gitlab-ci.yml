@@ -1,8 +1,6 @@
 stages:
   - build_qt
-  - build_rust_amd64
-  - build_rust_arm64
-  - build_rust_armv7
+  - build_rust
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -15,7 +13,6 @@ Build-Qt:
   artifacts:
     paths:
       - procweb-qt/build/procweb-1.0.0-x86_64.AppImage
-      - procweb-webui/dist/procweb-webui
   script:
     - cd procweb-webui
     - ./build.sh
@@ -36,50 +33,33 @@ Build-Rust amd64:
   image:
     name: carlonluca/procweb-ci-rust:latest
     entrypoint: [""]
-  stage: build_rust_amd64
+  stage: build_rust
+  services:
+    - docker:dind
   artifacts:
     paths:
-      - procweb-rust/target/x86_64-unknown-linux-musl/release/procweb-rust
+      - procweb-dist
   script:
+    - export CROSS_CONTAINER_IN_CONTAINER=true
+    - export HOSTNAME=$(docker ps -ql)
     - rustup target add x86_64-unknown-linux-musl
+    - cd procweb-webui
+    - ./build.sh
+    - cd ..
     - cd procweb-rust
+    - rm -f 386.js favicon.ico icon.svg index.html main.js polyfills.js runtime.js styles.css
+    - cp ../procweb-webui/dist/procweb-webui/* .
+    - cp ../icon.svg .
     - cargo build --release --target=x86_64-unknown-linux-musl
-  dependencies:
-    - Build-Qt
-
-Build-Rust arm64:
-  image:
-    name: carlonluca/procweb-ci-rust:latest@sha256:6003cf6ec314f006ffeb4d8179eb35c7319783b2e1d044c4c126c36a93f5c4c9
-    entrypoint: [""]
-  stage: build_rust_arm64
-  artifacts:
-    paths:
-      - procweb-rust/target/aarch64-unknown-linux-musl/release/procweb-rust
-  script:
-    - export CARGO_CFG_WINDOWS=1
-    - ln -s /usr/bin/ar /usr/bin/aarch64-linux-musl-ar
-    - rustup target add aarch64-unknown-linux-musl
-    - cd procweb-rust
-    - cargo build --release --target=aarch64-unknown-linux-musl
-  dependencies:
-    - Build-Qt
-
-Build-Rust armv7:
-  image:
-    name: carlonluca/procweb-ci-rust:latest@sha256:767aef6c0c7ba581eaacfddeee0cd5e615a8b35871b9e0a92740810db3258d13
-    entrypoint: [""]
-  stage: build_rust_armv7
-  artifacts:
-    paths:
-      - procweb-rust/target/armv7-unknown-linux-musleabihf/release/procweb-rust
-  script:
-    - export CARGO_HOME=/ramdisk/cargo
-    - export CARGO_CFG_WINDOWS=1
-    - curl https://sh.rustup.rs -sSf | bash -s -- --default-toolchain=1.67.0 -y
-    - export PATH=$CARGO_HOME/bin:$PATH
-    - ln -s /usr/bin/ar /usr/bin/arm-linux-musleabihf-ar
-    - rustup target add armv7-unknown-linux-musleabihf
-    - cd procweb-rust
-    - cargo build --release --target=armv7-unknown-linux-musleabihf
-  dependencies:
-    - Build-Qt
+    - mkdir -p ../procweb-dist/x86_64-unknown-linux-musl
+    - mv target/x86_64-unknown-linux-musl/release/procweb-rust ../procweb-dist/x86_64-unknown-linux-musl/
+    - cargo clean
+    - cargo install cross --git https://github.com/cross-rs/cross
+    - cross build --release --target aarch64-unknown-linux-musl
+    - mkdir -p ../procweb-dist/aarch64-unknown-linux-musl
+    - mv target/aarch64-unknown-linux-musl/release/procweb-rust ../procweb-dist/aarch64-unknown-linux-musl/
+    - cargo clean
+    - cross build --release --target armv7-unknown-linux-musleabihf
+    - mkdir -p ../procweb-dist/armv7-unknown-linux-musleabihf
+    - mv target/armv7-unknown-linux-musleabihf/release/procweb-rust ../procweb-dist/armv7-unknown-linux-musleabihf/
+    - find ..
