@@ -192,6 +192,9 @@ impl PWSampler {
                 (cpu_time - current_state.last_cpu_time) as f64
         };
 
+        current_state.last_cpu_time = cpu as u64;
+        current_state.last_proc_cpu_time = proc_usage_ticks;
+
         // RSS
         let page_size = page_size::get();
         let rss: u64 = proc_stat_values.get(23)
