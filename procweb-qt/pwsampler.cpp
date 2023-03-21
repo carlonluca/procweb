@@ -145,6 +145,9 @@ void PWSampler::acquireSample()
 
     double cpu = (cpuTime - m_lastCpuTime == 0) ? 0 : (procUsageTicks - m_lastProcCpuTime)/static_cast<double>(cpuTime - m_lastCpuTime);
 
+    m_lastCpuTime = cpu;
+    m_lastProcCpuTime = procUsageTicks;
+
     // RSS
     qint64 rss = 0;
     if (procStatValues.size() > 23) {
