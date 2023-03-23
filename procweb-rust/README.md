@@ -37,3 +37,7 @@ Then open a browser and go to:
 ```
 http://<ip-addr>:3000/
 ```
+
+<p align="center">
+  <img src="https://github.com/carlonluca/procweb/raw/master/docs/screenshot.webp" />
+</p>
