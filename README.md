@@ -32,7 +32,7 @@ Procweb includes a AppImage that can be run, without having to install any depen
 Here is an example of how procweb can monitor data and present it through the browser.
 
 <p align="center">
-<img width="70%" src="docs/screenshot.png">
+<img width="70%" src="docs/screenshot.webp">
 </p>
 
 ## Build
