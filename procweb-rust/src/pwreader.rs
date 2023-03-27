@@ -13,6 +13,10 @@ impl PWReader {
         Path::new(&Self::proc_dir(pid)).join("stat")
     }
 
+    pub fn proc_status_dir(pid: i64) -> PathBuf {
+        Path::new(&Self::proc_dir(pid)).join("status")
+    }
+
     pub fn proc_io_dir(pid: i64) -> PathBuf {
         Path::new(&Self::proc_dir(pid)).join("io")
     }
@@ -30,6 +34,11 @@ impl PWReader {
     pub fn read_stat() -> Result<String, Error> {
         Self::read_file(Path::new("/proc/stat").to_path_buf(),
             "proc stat")
+    }
+
+    pub fn read_proc_status(pid: i64) -> Result<String, Error> {
+        Self::read_file(Self::proc_status_dir(pid),
+            "proc status")
     }
 
     pub fn read_meminfo() -> Result<String, Error> {

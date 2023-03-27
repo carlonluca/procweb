@@ -257,7 +257,8 @@ export class AppComponent {
         rows.push(new DisplayRow("State", this.computeStateValue(sample.state), "fa-face-sleeping"))
         rows.push(new DisplayRow("CPU usage", (sample.cpu*100).toFixed(2) + "%", ""))
         rows.push(new DisplayRow("Resident set size", prettyBytes(sample.rssSize), ""))
-        rows.push(new DisplayRow("Virtual memory size", prettyBytes(sample.vmSize), ""));
+        rows.push(new DisplayRow("Resident set size peak", prettyBytes(sample.rssPeak), ""))
+        rows.push(new DisplayRow("Virtual memory size", prettyBytes(sample.vmSize), ""))
         rows.push(new DisplayRow("Total main memory", prettyBytes(sample.ramSize), ""))
         rows.push(new DisplayRow("Total read from disk", prettyBytes(sample.readDisk), ""))
         rows.push(new DisplayRow("Total written to disk", prettyBytes(sample.writeDisk), ""))

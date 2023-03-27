@@ -113,6 +113,10 @@ impl PWSampler {
     fn acquire_sample(pid: i64, current_state: &mut PWSamplerData) -> Option<PWSample> {
         let mut sample = PWSample::default();
         let proc_stat_content = PWReader::read_proc_stat(pid);
+        let proc_status_content = match PWReader::read_proc_status(pid) {
+            Err(_) => String::new(),
+            Ok(c) => c
+        };
         let proc_stat_values;
         let mut _proc_stat_content;
         match proc_stat_content {
@@ -231,6 +235,12 @@ impl PWSampler {
             .parse::<i64>()
             .unwrap_or(0i64);
 
+        // RSS peak
+        lazy_static! {
+            static ref VM_HWM_REGEX: Regex = Regex::new("VmHWM:\\s+(\\d+)\\s+kB").unwrap();
+        }
+        let rss_peak = PWSampler::read_if_matches(&VM_HWM_REGEX, &proc_status_content.to_string())*1024;
+
         // Start
         let clock_tick = match sysconf::raw::sysconf(sysconf::raw::SysconfVariable::ScClkTck) {
             Err(e) => {
@@ -250,7 +260,6 @@ impl PWSampler {
             None => 0,
             Some(v) => v - start_time_ms
         };
-        log::info!("uptime: {}", proc_uptime_ms);
         let start_time_proc: DateTime<Utc> = SystemTime::now()
             .sub(Duration::from_millis(proc_uptime_ms))
             .into();
@@ -264,6 +273,7 @@ impl PWSampler {
         sample.state = String::from(*state);
         sample.vm_size = vsize;
         sample.rss_size = rss as i64;
+        sample.rss_peak = rss_peak as i64;
         sample.uptime = proc_uptime_ms as i64;
         sample.ram_size = match total_mem {
             None => 0,
@@ -324,13 +334,6 @@ impl PWSampler {
     }
 
     fn read_io_values(pid: i64) -> Option<(PWIoValues, PWIoValues)> {
-        fn read_if_matches(regex: &Regex, pattern: &String) -> u64 {
-            match regex.captures(pattern) {
-                None => 0u64,
-                Some(v) => v.get(1).unwrap().as_str().parse::<u64>().unwrap_or(0u64)
-            }
-        }
-
         let proc_io_content = match PWReader::read_proc_io(pid) {
             Err(_) => return None,
             Ok(v) => v
@@ -344,14 +347,21 @@ impl PWSampler {
         }
 
         let disk = PWIoValues {
-            read: read_if_matches(&REGEX_RBYTES, &proc_io_content),
-            written: read_if_matches(&REGEX_WBYTES, &proc_io_content)
+            read: PWSampler::read_if_matches(&REGEX_RBYTES, &proc_io_content),
+            written: PWSampler::read_if_matches(&REGEX_WBYTES, &proc_io_content)
         };
         let all = PWIoValues {
-            read: read_if_matches(&REGEX_RCHAR, &proc_io_content),
-            written: read_if_matches(&REGEX_WCHAR, &proc_io_content)
+            read: PWSampler::read_if_matches(&REGEX_RCHAR, &proc_io_content),
+            written: PWSampler::read_if_matches(&REGEX_WCHAR, &proc_io_content)
         };
 
         Some((disk, all))
+    }
+
+    fn read_if_matches(regex: &Regex, pattern: &String) -> u64 {
+        match regex.captures(pattern) {
+            None => 0u64,
+            Some(v) => v.get(1).unwrap().as_str().parse::<u64>().unwrap_or(0u64)
+        }
     }
 }

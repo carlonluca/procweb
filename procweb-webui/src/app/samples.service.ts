@@ -31,6 +31,7 @@ export interface Sample {
     pid: number,
     cpu: number,
     rssSize: number,
+    rssPeak: number,
     vmSize: number,
     ramSize: number,
     numThreads: number,
