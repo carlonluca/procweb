@@ -1,12 +1,10 @@
-use std::f32::consts::E;
-use std::ops::{Sub, Add};
+use std::ops::Sub;
 use std::thread;
 use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::sync::{Arc, Mutex};
 use lazy_static::lazy_static;
 use regex::Regex;
-use sysinfo::{System, SystemExt, CpuExt};
 use chrono::{DateTime, Utc, SecondsFormat};
 use log;
 use crate::pwdata::PWSample;
@@ -26,6 +24,7 @@ pub struct PWSamplerData {
     pub last_cpu_time: u64,
     pub last_proc_cpu_time: u64
 }
+
 pub struct PWSampler {
     pid: i64,
     thread_handle: Option<std::thread::JoinHandle<()>>,
@@ -84,32 +83,6 @@ impl PWSampler {
 
     // Private portion
     // ===============
-    fn acquire_sample_systemcrate(sys: &mut System) -> PWSample {
-        let now = SystemTime::now();
-        let ts = match now.duration_since(UNIX_EPOCH) {
-            Ok(d) => d,
-            Err(err) => {
-                log::warn!("Could not get time: {:?}", err);
-                Duration::from_millis(0)
-            }
-        };
-
-        sys.refresh_all();
-
-        let mut avg_cpu = 0f64;
-        for cpu in sys.cpus() {
-            avg_cpu += cpu.cpu_usage() as f64;
-        }
-        avg_cpu = avg_cpu/sys.cpus().len() as f64;
-
-        let mut def = PWSample::default();
-        def.ts = ts.as_millis() as i64;
-        def.cpu = avg_cpu;
-
-        log::info!("Sample: {:?}", def);
-        def
-    }
-
     fn acquire_sample(pid: i64, current_state: &mut PWSamplerData) -> Option<PWSample> {
         let mut sample = PWSample::default();
         let proc_stat_content = PWReader::read_proc_stat(pid);

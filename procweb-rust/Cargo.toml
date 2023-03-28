@@ -14,7 +14,6 @@ log = "0.4.0"
 env_logger = "0.9.0"
 actix-rt = "2.7.0"
 actix-web = "4"
-sysinfo = "0.27.7"
 serde = { version = "1.0.126", features = ["derive"] }
 timer = "0.2.0"
 chrono = "0.4.23"
