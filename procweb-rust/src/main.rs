@@ -10,10 +10,10 @@ use actix_web::{
     Responder,
     HttpResponse
 };
-use pwsampler::PWSampler;
+use pwsamplerproc::PWSamplerProc;
 use std::include_bytes;
 use std::collections::HashMap;
-mod pwsampler;
+mod pwsamplerproc;
 mod pwreader;
 mod pwdata;
 
@@ -27,7 +27,7 @@ struct Cli {
 }
 
 #[get("/api/samples")]
-async fn get_samples(data: web::Data<Arc<Mutex<PWSampler>>>) -> impl Responder {
+async fn get_samples(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Responder {
     let samples = data.lock().unwrap().samples();
     let _samples = samples.lock().unwrap();
     let __samples = &*_samples;
@@ -35,7 +35,7 @@ async fn get_samples(data: web::Data<Arc<Mutex<PWSampler>>>) -> impl Responder {
 }
 
 #[get("/api/setup")]
-async fn get_setup(data: web::Data<Arc<Mutex<PWSampler>>>) -> impl Responder {
+async fn get_setup(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Responder {
     web::Json(data.lock().unwrap().setup())
 }
 
@@ -83,7 +83,7 @@ async fn main() -> std::io::Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
     log::info!("Version {}", VERSION);
 
-    let sampler = Arc::new(Mutex::new(pwsampler::PWSampler::new(cli.pid)));
+    let sampler = Arc::new(Mutex::new(pwsamplerproc::PWSamplerProc::new(cli.pid)));
     sampler.lock().unwrap().start();
 
     HttpServer::new(move || {

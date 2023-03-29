@@ -25,16 +25,16 @@ pub struct PWSamplerData {
     pub last_proc_cpu_time: u64
 }
 
-pub struct PWSampler {
+pub struct PWSamplerProc {
     pid: i64,
     thread_handle: Option<std::thread::JoinHandle<()>>,
     samples: Arc<Mutex<Vec<PWSample>>>
 }
 
-impl PWSampler {
-    pub fn new(pid: i64) -> PWSampler {
+impl PWSamplerProc {
+    pub fn new(pid: i64) -> PWSamplerProc {
         log::info!("Sampler started");
-        PWSampler {
+        PWSamplerProc {
             pid: pid,
             thread_handle: None,
             samples: Arc::new(Mutex::new(Vec::new()))
@@ -52,7 +52,7 @@ impl PWSampler {
             loop {
                 {
                     let mut data = samples.lock().unwrap();
-                    match PWSampler::acquire_sample(pid, &mut state) {
+                    match PWSamplerProc::acquire_sample(pid, &mut state) {
                         Some(sample) => {
                             log::info!("Sample: {:?}", sample);
                             (*data).push(sample)
@@ -212,7 +212,7 @@ impl PWSampler {
         lazy_static! {
             static ref VM_HWM_REGEX: Regex = Regex::new("VmHWM:\\s+(\\d+)\\s+kB").unwrap();
         }
-        let rss_peak = PWSampler::read_if_matches(&VM_HWM_REGEX, &proc_status_content.to_string())*1024;
+        let rss_peak = PWSamplerProc::read_if_matches(&VM_HWM_REGEX, &proc_status_content.to_string())*1024;
 
         // Start
         let clock_tick = match sysconf::raw::sysconf(sysconf::raw::SysconfVariable::ScClkTck) {
@@ -228,7 +228,7 @@ impl PWSampler {
             .parse::<i64>()
             .unwrap_or(0i64) as f64)/(clock_tick as f64)*1000f64).round() as u64;
 
-        let uptime_ms = PWSampler::read_sys_uptime_millis();
+        let uptime_ms = PWSamplerProc::read_sys_uptime_millis();
         let proc_uptime_ms = match uptime_ms {
             None => 0,
             Some(v) => v - start_time_ms
@@ -320,12 +320,12 @@ impl PWSampler {
         }
 
         let disk = PWIoValues {
-            read: PWSampler::read_if_matches(&REGEX_RBYTES, &proc_io_content),
-            written: PWSampler::read_if_matches(&REGEX_WBYTES, &proc_io_content)
+            read: PWSamplerProc::read_if_matches(&REGEX_RBYTES, &proc_io_content),
+            written: PWSamplerProc::read_if_matches(&REGEX_WBYTES, &proc_io_content)
         };
         let all = PWIoValues {
-            read: PWSampler::read_if_matches(&REGEX_RCHAR, &proc_io_content),
-            written: PWSampler::read_if_matches(&REGEX_WCHAR, &proc_io_content)
+            read: PWSamplerProc::read_if_matches(&REGEX_RCHAR, &proc_io_content),
+            written: PWSamplerProc::read_if_matches(&REGEX_WCHAR, &proc_io_content)
         };
 
         Some((disk, all))
