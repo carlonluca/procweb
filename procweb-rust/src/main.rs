@@ -11,9 +11,14 @@ use actix_web::{
     HttpResponse
 };
 use pwsamplerproc::PWSamplerProc;
+use pwsamplerthread::PWSamplerThread;
+use pwsampler::PWSampler;
+use pwdata::PWSampleProc;
 use std::include_bytes;
 use std::collections::HashMap;
+mod pwsamplerthread;
 mod pwsamplerproc;
+mod pwsampler;
 mod pwreader;
 mod pwdata;
 
@@ -83,7 +88,7 @@ async fn main() -> std::io::Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
     log::info!("Version {}", VERSION);
 
-    let sampler = Arc::new(Mutex::new(pwsamplerproc::PWSamplerProc::new(cli.pid)));
+    let sampler = Arc::new(Mutex::new(PWSamplerThread::<PWSampleProc>::new(Arc::new(Mutex::new(PWSamplerProc::new(cli.pid))))));
     sampler.lock().unwrap().start();
 
     HttpServer::new(move || {

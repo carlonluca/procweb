@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug)]
 #[derive(Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct PWSample {
+pub struct PWSampleProc {
     pub ts: i64,
     pub cpu: f64,
     pub vm_peak: i64,
@@ -23,9 +23,9 @@ pub struct PWSample {
     pub state: String
 }
 
-impl Default for PWSample {
-    fn default() -> PWSample {
-        PWSample {
+impl Default for PWSampleProc {
+    fn default() -> PWSampleProc {
+        PWSampleProc {
             ts: 0,
             cpu: 0f64,
             vm_peak: 0,
@@ -44,6 +44,10 @@ impl Default for PWSample {
             state: String::new()
         }
     }
+}
+
+pub struct PWSampleContainter {
+    pub name: String
 }
 
 #[derive(Serialize, Deserialize)]

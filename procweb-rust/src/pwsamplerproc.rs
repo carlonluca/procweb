@@ -1,15 +1,14 @@
 use std::ops::Sub;
-use std::thread;
-use std::thread::sleep;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::sync::{Arc, Mutex};
 use lazy_static::lazy_static;
 use regex::Regex;
 use chrono::{DateTime, Utc, SecondsFormat};
 use log;
-use crate::pwdata::PWSample;
+use crate::pwdata::PWSampleProc;
 use crate::pwdata::PWSetup;
 use crate::pwreader::PWReader;
+use crate::pwsampler::PWSampler;
 extern crate timer;
 extern crate chrono;
 extern crate page_size;
@@ -27,66 +26,21 @@ pub struct PWSamplerData {
 
 pub struct PWSamplerProc {
     pid: i64,
-    thread_handle: Option<std::thread::JoinHandle<()>>,
-    samples: Arc<Mutex<Vec<PWSample>>>
+    current_state: Option<PWSamplerData>,
+    samples: Arc<Mutex<Vec<PWSampleProc>>>
 }
 
-impl PWSamplerProc {
-    pub fn new(pid: i64) -> PWSamplerProc {
-        log::info!("Sampler started");
-        PWSamplerProc {
-            pid: pid,
-            thread_handle: None,
-            samples: Arc::new(Mutex::new(Vec::new()))
-        }
-    }
+impl PWSampler<PWSampleProc> for PWSamplerProc {
 
-    pub fn start(&mut self) {
-        let samples = self.samples.clone();
-        let pid = self.pid;
-        self.thread_handle = Some(thread::spawn(move || {
-            let mut state = PWSamplerData {
-                last_cpu_time: 0,
-                last_proc_cpu_time: 0
-            };
-            loop {
-                {
-                    let mut data = samples.lock().unwrap();
-                    match PWSamplerProc::acquire_sample(pid, &mut state) {
-                        Some(sample) => {
-                            log::info!("Sample: {:?}", sample);
-                            (*data).push(sample)
-                        },
-                        None => {}
-                    };
-                }
-                
-                sleep(Duration::from_secs(1));
-            }
-        }));
-    }
-
-    pub fn samples(&self) -> Arc<Mutex<Vec<PWSample>>> {
+    fn samples(&self) -> Arc<Mutex<Vec<PWSampleProc>>> {
         self.samples.clone()
     }
 
-    pub fn setup(&self) -> PWSetup {
-        PWSetup {
-            cmdline: match PWReader::read_cmd_line(self.pid) {
-                Err(_) => "".to_string(),
-                Ok(v) => v
-            },
-            pid: self.pid,
-            sample_interval: 1000
-        }
-    }
-
-    // Private portion
-    // ===============
-    fn acquire_sample(pid: i64, current_state: &mut PWSamplerData) -> Option<PWSample> {
-        let mut sample = PWSample::default();
-        let proc_stat_content = PWReader::read_proc_stat(pid);
-        let proc_status_content = match PWReader::read_proc_status(pid) {
+    fn sample(&mut self) -> Option<PWSampleProc> {
+        log::info!("sample");
+        let mut sample = PWSampleProc::default();
+        let proc_stat_content = PWReader::read_proc_stat(self.pid);
+        let proc_status_content = match PWReader::read_proc_status(self.pid) {
             Err(_) => String::new(),
             Ok(c) => c
         };
@@ -155,22 +109,29 @@ impl PWSamplerProc {
             cpu_time += val_str.parse::<u64>().unwrap_or(0u64);
         }
 
-        if current_state.last_cpu_time <= 0 || current_state.last_proc_cpu_time <= 0 {
-            current_state.last_cpu_time = cpu_time;
-            current_state.last_proc_cpu_time = proc_usage_ticks;
-            return None
+        match self.current_state {
+            None => {
+                self.current_state = Some(PWSamplerData {
+                    last_cpu_time: cpu_time,
+                    last_proc_cpu_time: proc_usage_ticks
+                });
+                return None;
+            },
+            Some(_) => {}
         }
         
-        let cpu: f64 = if cpu_time - current_state.last_cpu_time == 0 {
+        let cpu: f64 = if cpu_time - self.current_state.as_ref().unwrap().last_cpu_time == 0 {
             0f64
         }
         else {
-            (proc_usage_ticks - current_state.last_proc_cpu_time) as f64/
-                (cpu_time - current_state.last_cpu_time) as f64
+            (proc_usage_ticks - self.current_state.as_ref().unwrap().last_proc_cpu_time) as f64/
+                (cpu_time - self.current_state.as_ref().unwrap().last_cpu_time) as f64
         };
 
-        current_state.last_cpu_time = cpu as u64;
-        current_state.last_proc_cpu_time = proc_usage_ticks;
+        self.current_state = Some(PWSamplerData {
+            last_cpu_time: cpu as u64,
+            last_proc_cpu_time: proc_usage_ticks
+        });
 
         // RSS
         let page_size = page_size::get();
@@ -180,7 +141,7 @@ impl PWSamplerProc {
             .unwrap_or(0u64)*(page_size as u64);
 
         // Total mem
-        let total_mem = Self::read_total_mem();
+        let total_mem = self.read_total_mem();
 
         // Num threads
         let num_threads  = proc_stat_values
@@ -212,7 +173,7 @@ impl PWSamplerProc {
         lazy_static! {
             static ref VM_HWM_REGEX: Regex = Regex::new("VmHWM:\\s+(\\d+)\\s+kB").unwrap();
         }
-        let rss_peak = PWSamplerProc::read_if_matches(&VM_HWM_REGEX, &proc_status_content.to_string())*1024;
+        let rss_peak = self.read_if_matches(&VM_HWM_REGEX, &proc_status_content.to_string())*1024;
 
         // Start
         let clock_tick = match sysconf::raw::sysconf(sysconf::raw::SysconfVariable::ScClkTck) {
@@ -228,7 +189,7 @@ impl PWSamplerProc {
             .parse::<i64>()
             .unwrap_or(0i64) as f64)/(clock_tick as f64)*1000f64).round() as u64;
 
-        let uptime_ms = PWSamplerProc::read_sys_uptime_millis();
+        let uptime_ms = self.read_sys_uptime_millis();
         let proc_uptime_ms = match uptime_ms {
             None => 0,
             Some(v) => v - start_time_ms
@@ -257,7 +218,7 @@ impl PWSamplerProc {
             None => 0,
             Some(v) => v as i64
         };
-        match Self::read_io_values(pid) {
+        match self.read_io_values(self.pid) {
             None => {},
             Some(v) => {
                 sample.read_all = v.1.read as i64;
@@ -269,8 +230,19 @@ impl PWSamplerProc {
 
         Some(sample)
     }
+}
 
-    fn read_total_mem() -> Option<u64> {
+impl PWSamplerProc {
+
+    pub fn new(pid: i64) -> PWSamplerProc {
+        PWSamplerProc {
+            pid: pid,
+            current_state: None,
+            samples: Arc::new(Mutex::new(Vec::<PWSampleProc>::new()))
+        }
+    }
+
+    fn read_total_mem(&self) -> Option<u64> {
         lazy_static! {
             static ref RE: Regex = Regex::new("MemTotal:\\s+(\\d+)\\s+kB").unwrap();
         }
@@ -287,7 +259,7 @@ impl PWSamplerProc {
         None
     }
 
-    fn read_sys_uptime_millis() -> Option<u64> {
+    fn read_sys_uptime_millis(&self) -> Option<u64> {
         let content = match PWReader::read_uptime() {
             Err(e) => return None,
             Ok(v) => v
@@ -306,7 +278,7 @@ impl PWSamplerProc {
             .unwrap_or(0f64)*1000f64).round() as u64);
     }
 
-    fn read_io_values(pid: i64) -> Option<(PWIoValues, PWIoValues)> {
+    fn read_io_values(&self, pid: i64) -> Option<(PWIoValues, PWIoValues)> {
         let proc_io_content = match PWReader::read_proc_io(pid) {
             Err(_) => return None,
             Ok(v) => v
@@ -320,21 +292,32 @@ impl PWSamplerProc {
         }
 
         let disk = PWIoValues {
-            read: PWSamplerProc::read_if_matches(&REGEX_RBYTES, &proc_io_content),
-            written: PWSamplerProc::read_if_matches(&REGEX_WBYTES, &proc_io_content)
+            read: self.read_if_matches(&REGEX_RBYTES, &proc_io_content),
+            written: self.read_if_matches(&REGEX_WBYTES, &proc_io_content)
         };
         let all = PWIoValues {
-            read: PWSamplerProc::read_if_matches(&REGEX_RCHAR, &proc_io_content),
-            written: PWSamplerProc::read_if_matches(&REGEX_WCHAR, &proc_io_content)
+            read: self.read_if_matches(&REGEX_RCHAR, &proc_io_content),
+            written: self.read_if_matches(&REGEX_WCHAR, &proc_io_content)
         };
 
         Some((disk, all))
     }
 
-    fn read_if_matches(regex: &Regex, pattern: &String) -> u64 {
+    fn read_if_matches(&self, regex: &Regex, pattern: &String) -> u64 {
         match regex.captures(pattern) {
             None => 0u64,
             Some(v) => v.get(1).unwrap().as_str().parse::<u64>().unwrap_or(0u64)
+        }
+    }
+
+    pub fn setup(&self) -> PWSetup {
+        PWSetup {
+            cmdline: match PWReader::read_cmd_line(self.pid) {
+                Err(_) => "".to_string(),
+                Ok(v) => v
+            },
+            pid: self.pid,
+            sample_interval: 1000
         }
     }
 }
