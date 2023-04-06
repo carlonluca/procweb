@@ -1,13 +1,17 @@
 use std::thread::{self, JoinHandle};
+use std::thread::sleep;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
+use log::info;
+
 use crate::pwsampler::PWSampler;
 
 pub struct PWSamplerThread<T: 'static> {
     thread_handle: Option<JoinHandle<()>>,
     running: Arc<AtomicBool>,
-    sampler: Arc<Mutex<dyn PWSampler<T>>>
+    pub sampler: Arc<Mutex<dyn PWSampler<T>>>
 }
 
 impl<T> PWSamplerThread<T> {
@@ -27,19 +31,19 @@ impl<T> PWSamplerThread<T> {
     /// 
     pub fn start(&mut self) {
         if self.thread_handle.is_none() {
-            log::info!("thread");
             let sampler = self.sampler.clone();
             let running = Arc::new(AtomicBool::new(true));
             let thread_handle = thread::spawn({
-                log::info!("thread");
                 let running = running.clone();
                 move || {
-                    log::info!("thread");
                     while running.load(Ordering::Relaxed) {
-                        log::info!("thread2");
-                        let mut sampler = sampler.lock().unwrap();
-                        let sample = sampler.sample();
-                        //log::info!("Sample: {:?}", sample);
+                        {
+                            let mut sampler = sampler.lock().unwrap();
+                            let sample = sampler.sample();
+                        }
+                        
+                        log::info!("Sample taken");
+                        sleep(Duration::from_secs(1));
                     }
                 }
             });

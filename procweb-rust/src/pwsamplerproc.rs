@@ -228,6 +228,8 @@ impl PWSampler<PWSampleProc> for PWSamplerProc {
             }
         }
 
+        self.samples.as_ref().lock().unwrap().push(sample.clone());
+
         Some(sample)
     }
 }
