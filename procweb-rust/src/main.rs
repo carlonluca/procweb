@@ -30,7 +30,7 @@ use actix_web::{
 use pwsamplerproc::PWSamplerProc;
 use pwsamplerthread::PWSamplerThread;
 use pwsampler::PWSampler;
-use pwdata::PWSampleProc;
+use pwdata::{PWSampleProc, PWSetupProc};
 use std::include_bytes;
 use std::collections::HashMap;
 mod pwsamplerthread;
@@ -59,14 +59,8 @@ async fn get_samples(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Respond
 }
 
 #[get("/api/setup")]
-async fn get_setup(data: web::Data<Arc<Mutex<dyn PWSampler<PWSampleProc>>>>) -> impl Responder {
-    // TODO
-    log::info!("skjasdjlksd");
-    let samples = data.lock().unwrap().samples();
-    let _samples = samples.lock().unwrap();
-    let __samples = &*_samples;
-    log::info!("Samples: {}", __samples.len());
-    web::Json(__samples.clone())
+async fn get_setup(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Responder {
+    web::Json(data.lock().unwrap().setup().clone())
 }
 
 #[get("/{filename:.*}")]
@@ -114,7 +108,9 @@ async fn main() -> std::io::Result<()> {
     log::info!("Version {}", VERSION);
 
     let sampler = Arc::new(Mutex::new(PWSamplerProc::new(cli.pid)));
-    let mut sampler_thread = PWSamplerThread::<PWSampleProc>::new(sampler.clone());
+    let mut sampler_thread = PWSamplerThread::<PWSampleProc, PWSetupProc>::new(
+        sampler.clone()
+    );
     sampler_thread.start();
 
     HttpServer::new(move || {

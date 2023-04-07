@@ -23,7 +23,7 @@ use regex::Regex;
 use chrono::{DateTime, Utc, SecondsFormat};
 use log;
 use crate::pwdata::PWSampleProc;
-use crate::pwdata::PWSetup;
+use crate::pwdata::PWSetupProc;
 use crate::pwreader::PWReader;
 use crate::pwsampler::PWSampler;
 extern crate timer;
@@ -44,13 +44,18 @@ pub struct PWSamplerData {
 pub struct PWSamplerProc {
     pid: i64,
     current_state: Option<PWSamplerData>,
-    samples: Arc<Mutex<Vec<PWSampleProc>>>
+    samples: Arc<Mutex<Vec<PWSampleProc>>>,
+    setup: PWSetupProc
 }
 
-impl PWSampler<PWSampleProc> for PWSamplerProc {
+impl PWSampler<PWSampleProc, PWSetupProc> for PWSamplerProc {
 
     fn samples(&self) -> Arc<Mutex<Vec<PWSampleProc>>> {
         self.samples.clone()
+    }
+
+    fn setup(&self) -> &PWSetupProc {
+        &self.setup
     }
 
     fn sample(&mut self) -> Option<PWSampleProc> {
@@ -126,7 +131,8 @@ impl PWSampler<PWSampleProc> for PWSamplerProc {
             cpu_time += val_str.parse::<u64>().unwrap_or(0u64);
         }
 
-        match self.current_state {
+        let cpu;
+        match &self.current_state {
             None => {
                 self.current_state = Some(PWSamplerData {
                     last_cpu_time: cpu_time,
@@ -134,16 +140,18 @@ impl PWSampler<PWSampleProc> for PWSamplerProc {
                 });
                 return None;
             },
-            Some(_) => {}
+            Some(current_state) => {
+                cpu = if cpu_time - current_state.last_cpu_time == 0 {
+                    0f64
+                }
+                else {
+                    (proc_usage_ticks - current_state.last_proc_cpu_time) as f64/
+                        (cpu_time - current_state.last_cpu_time) as f64
+                };
+            }
         }
-        
-        let cpu: f64 = if cpu_time - self.current_state.as_ref().unwrap().last_cpu_time == 0 {
-            0f64
-        }
-        else {
-            (proc_usage_ticks - self.current_state.as_ref().unwrap().last_proc_cpu_time) as f64/
-                (cpu_time - self.current_state.as_ref().unwrap().last_cpu_time) as f64
-        };
+
+        log::info!("CPU: {} {} {}", cpu_time, proc_usage_ticks, cpu);
 
         self.current_state = Some(PWSamplerData {
             last_cpu_time: cpu as u64,
@@ -257,7 +265,15 @@ impl PWSamplerProc {
         PWSamplerProc {
             pid: pid,
             current_state: None,
-            samples: Arc::new(Mutex::new(Vec::<PWSampleProc>::new()))
+            samples: Arc::new(Mutex::new(Vec::<PWSampleProc>::new())),
+            setup: PWSetupProc {
+                cmdline: match PWReader::read_cmd_line(pid) {
+                    Err(_) => "".to_string(),
+                    Ok(v) => v
+                },
+                pid: pid,
+                sample_interval: 1000
+            }
         }
     }
 
@@ -326,17 +342,6 @@ impl PWSamplerProc {
         match regex.captures(pattern) {
             None => 0u64,
             Some(v) => v.get(1).unwrap().as_str().parse::<u64>().unwrap_or(0u64)
-        }
-    }
-
-    pub fn setup(&self) -> PWSetup {
-        PWSetup {
-            cmdline: match PWReader::read_cmd_line(self.pid) {
-                Err(_) => "".to_string(),
-                Ok(v) => v
-            },
-            pid: self.pid,
-            sample_interval: 1000
         }
     }
 }

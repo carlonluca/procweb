@@ -21,22 +21,21 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
-use log::info;
 
 use crate::pwsampler::PWSampler;
 
-pub struct PWSamplerThread<T: 'static> {
+pub struct PWSamplerThread<T: 'static, ST: 'static> {
     thread_handle: Option<JoinHandle<()>>,
     running: Arc<AtomicBool>,
-    pub sampler: Arc<Mutex<dyn PWSampler<T>>>
+    sampler: Arc<Mutex<dyn PWSampler<T, ST>>>
 }
 
-impl<T> PWSamplerThread<T> {
+impl<T, ST> PWSamplerThread<T, ST> {
     ///
     /// Creates a new instance.
     /// 
-    pub fn new(sampler: Arc<Mutex<dyn PWSampler<T>>>) -> PWSamplerThread<T> {
-        PWSamplerThread::<T> {
+    pub fn new(sampler: Arc<Mutex<dyn PWSampler<T, ST>>>) -> PWSamplerThread<T, ST> {
+        PWSamplerThread::<T, ST> {
             thread_handle: None,
             running: Arc::new(AtomicBool::new(true)),
             sampler: sampler

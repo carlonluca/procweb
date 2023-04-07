@@ -63,15 +63,11 @@ impl Default for PWSampleProc {
     }
 }
 
-pub struct PWSampleContainter {
-    pub name: String
-}
-
 #[derive(Serialize, Deserialize)]
 #[derive(Debug)]
 #[derive(Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct PWSetup {
+pub struct PWSetupProc {
     pub cmdline: String,
     pub pid: i64,
     pub sample_interval: i64

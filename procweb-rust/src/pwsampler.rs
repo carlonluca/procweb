@@ -21,7 +21,8 @@ use std::sync::{Arc, Mutex};
 /// Trait for sampler classes. Every sampler has a code to sample
 /// data and a method to return the samples.
 /// 
-pub trait PWSampler<S>: Sync + Send {
+pub trait PWSampler<S, ST>: Sync + Send {
     fn sample(&mut self) -> Option<S>;
     fn samples(&self) -> Arc<Mutex<Vec<S>>>;
+    fn setup(&self) -> &ST;
 }
