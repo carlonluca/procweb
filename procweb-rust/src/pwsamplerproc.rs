@@ -59,7 +59,6 @@ impl PWSampler<PWSampleProc, PWSetupProc> for PWSamplerProc {
     }
 
     fn sample(&mut self) -> Option<PWSampleProc> {
-        log::info!("sample");
         let mut sample = PWSampleProc::default();
         let proc_stat_content = PWReader::read_proc_stat(self.pid);
         let proc_status_content = match PWReader::read_proc_status(self.pid) {
@@ -151,10 +150,8 @@ impl PWSampler<PWSampleProc, PWSetupProc> for PWSamplerProc {
             }
         }
 
-        log::info!("CPU: {} {} {}", cpu_time, proc_usage_ticks, cpu);
-
         self.current_state = Some(PWSamplerData {
-            last_cpu_time: cpu as u64,
+            last_cpu_time: cpu_time as u64,
             last_proc_cpu_time: proc_usage_ticks
         });
 

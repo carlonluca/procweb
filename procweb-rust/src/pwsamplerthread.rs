@@ -17,10 +17,11 @@
 
 use std::thread::{self, JoinHandle};
 use std::thread::sleep;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
+use core::fmt::Debug;
 
 use crate::pwsampler::PWSampler;
 
@@ -30,7 +31,7 @@ pub struct PWSamplerThread<T: 'static, ST: 'static> {
     sampler: Arc<Mutex<dyn PWSampler<T, ST>>>
 }
 
-impl<T, ST> PWSamplerThread<T, ST> {
+impl<T: Debug, ST: Debug> PWSamplerThread<T, ST> {
     ///
     /// Creates a new instance.
     /// 
@@ -56,9 +57,9 @@ impl<T, ST> PWSamplerThread<T, ST> {
                         {
                             let mut sampler = sampler.lock().unwrap();
                             let sample = sampler.sample();
+                            log::info!("Sample acquired: {:?}", sample);
                         }
                         
-                        log::info!("Sample taken");
                         sleep(Duration::from_secs(1));
                     }
                 }

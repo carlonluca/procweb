@@ -16,12 +16,13 @@
  */
 
 use std::sync::{Arc, Mutex};
+use core::fmt::Debug;
 
 ///
 /// Trait for sampler classes. Every sampler has a code to sample
 /// data and a method to return the samples.
 /// 
-pub trait PWSampler<S, ST>: Sync + Send {
+pub trait PWSampler<S: Debug, ST: Debug>: Sync + Send {
     fn sample(&mut self) -> Option<S>;
     fn samples(&self) -> Arc<Mutex<Vec<S>>>;
     fn setup(&self) -> &ST;

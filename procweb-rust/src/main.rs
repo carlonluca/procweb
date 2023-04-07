@@ -50,11 +50,9 @@ struct Cli {
 
 #[get("/api/samples")]
 async fn get_samples(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Responder {
-    log::info!("skjasdjlksd");
     let samples = data.lock().unwrap().samples();
     let _samples = samples.lock().unwrap();
     let __samples = &*_samples;
-    log::info!("Samples: {}", __samples.len());
     web::Json(__samples.clone())
 }
 
@@ -117,7 +115,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(sampler.clone()))
             .service(get_samples)
-            //.service(get_setup)
+            .service(get_setup)
             .service(get_web)
     })
     .bind(("0.0.0.0", cli.port))?
