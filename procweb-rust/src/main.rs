@@ -1,3 +1,20 @@
+/**
+ * Copyright (C) 2023 Luca Carlon. All rights reserved.
+ * 
+ * This file is part of procweb-rust.
+ * 
+ * procweb-rust is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * procweb-rust is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE. See the GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with procweb-rust. If not,
+ * see <https://www.gnu.org/licenses/>.
+ */
+
 use std::sync::Arc;
 use std::sync::Mutex;
 use actix_web::http::header::ContentType;
@@ -11,9 +28,14 @@ use actix_web::{
     HttpResponse
 };
 use pwsamplerproc::PWSamplerProc;
+use pwsamplerthread::PWSamplerThread;
+use pwsampler::PWSampler;
+use pwdata::{PWSampleProc, PWSetupProc};
 use std::include_bytes;
 use std::collections::HashMap;
+mod pwsamplerthread;
 mod pwsamplerproc;
+mod pwsampler;
 mod pwreader;
 mod pwdata;
 
@@ -36,7 +58,7 @@ async fn get_samples(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Respond
 
 #[get("/api/setup")]
 async fn get_setup(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Responder {
-    web::Json(data.lock().unwrap().setup())
+    web::Json(data.lock().unwrap().setup().clone())
 }
 
 #[get("/{filename:.*}")]
@@ -83,8 +105,11 @@ async fn main() -> std::io::Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
     log::info!("Version {}", VERSION);
 
-    let sampler = Arc::new(Mutex::new(pwsamplerproc::PWSamplerProc::new(cli.pid)));
-    sampler.lock().unwrap().start();
+    let sampler = Arc::new(Mutex::new(PWSamplerProc::new(cli.pid)));
+    let mut sampler_thread = PWSamplerThread::<PWSampleProc, PWSetupProc>::new(
+        sampler.clone()
+    );
+    sampler_thread.start();
 
     HttpServer::new(move || {
         App::new()
