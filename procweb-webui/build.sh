@@ -2,5 +2,5 @@
 
 export NG_CLI_ANALYTICS=false
 npm i
-ng analytics off
-ng build --output-hashing none
+npx ng analytics off
+npx ng build --output-hashing none
