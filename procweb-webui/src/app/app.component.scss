@@ -53,20 +53,23 @@ table {
 }
 
 #sliderRight {
+    width: 30%;
     margin-left: 2em;
 }
 
 #sliderLeft {
-    margin-left: 2em;
+    width: 30%;
+    margin-right: 2em;
 }
 
 #comboRight {
-    margin-left: 2em;
     width: 30%;
+    margin-left: 2em;
 }
 
 #comboLeft {
     width: 30%;
+    margin-right: 2em;
 }
 
 .mat-warning {

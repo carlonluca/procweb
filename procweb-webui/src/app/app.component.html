@@ -26,11 +26,21 @@
 
 <section class="mat-typography page-element">
     <br/>
-    <div class="center-container">Recording time: {{ sampledTime }}</div>
+    
+    <div class="center-container">
+        {{ procData }}
+    </div>
 
     <div class="center-container">
-        <div class="center-container axis-slider">Left range</div>
-        <div class="center-container axis-slider">Right range</div>
+        <mat-slider id="sliderLeft" class="axis-slider" min="0" max="1" step="0.01" [disabled]="!leftEnabled">
+            <input [(value)]="leftSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
+            <input [(value)]="leftSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
+        </mat-slider>
+        <div style="width: 60%;"></div>
+        <mat-slider id="sliderRight" class="axis-slider" min="0" max="1" step="0.01" [disabled]="!rightEnabled">
+            <input [(value)]="rightSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
+            <input [(value)]="rightSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
+        </mat-slider>
     </div>
     <div class="center-container">
         <mat-form-field id="comboLeft" appearance="fill">
@@ -41,14 +51,7 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-slider id="sliderLeft" class="axis-slider" min="0" max="1" step="0.01" [disabled]="!leftEnabled">
-            <input [(value)]="leftSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
-            <input [(value)]="leftSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
-        </mat-slider>
-        <mat-slider id="sliderRight" class="axis-slider" min="0" max="1" step="0.01" [disabled]="!rightEnabled">
-            <input [(value)]="rightSelectedMin" (dragEnd)="selectionChanged()" matSliderStartThumb>
-            <input [(value)]="rightSelectedMax" (dragEnd)="selectionChanged()" matSliderEndThumb>
-        </mat-slider>
+        <div style="width: 60%;"></div>
         <mat-form-field id="comboRight" appearance="fill">
             <mat-label>Right measure</mat-label>
             <mat-select [(ngModel)]="measureRight">
@@ -89,9 +92,7 @@
 
     <br/>
 
-    <div class="center-container">
-        {{ procData }}
-    </div>
+    <div class="center-container">Recording time: {{ sampledTime }}</div>
 
     <br />
 
