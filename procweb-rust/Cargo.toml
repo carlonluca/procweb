@@ -12,7 +12,7 @@ categories = ["Command line utilities", "Development tools", "Embedded developme
 [dependencies]
 log = "0.4.0"
 env_logger = "0.9.0"
-actix-rt = "2.7.0"
+actix-rt = "2.8.0"
 actix-web = "4"
 serde = { version = "1.0.126", features = ["derive"] }
 timer = "0.2.0"
@@ -24,3 +24,8 @@ regex = "1"
 sysconf = "0.3.4"
 mime_guess = "2.0.4"
 mime = "0.3.16"
+tokio = { version = "1.27.0", features = ["full"] }
+awc = "3.1.1"
+actix-tls = "3.0.3"
+actix-service = "2.0.2"
+futures = "0.3.28"

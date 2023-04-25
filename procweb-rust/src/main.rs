@@ -1,3 +1,5 @@
+use core::borrow;
+use std::path::Path;
 /**
  * Copyright (C) 2023 Luca Carlon. All rights reserved.
  * 
@@ -27,17 +29,32 @@ use actix_web::{
     Responder,
     HttpResponse
 };
+use futures::executor::block_on;
+use pwsamplerdocker::PWSampleDocker;
+use pwsamplerdocker::PWSetupDocker;
 use pwsamplerproc::PWSamplerProc;
 use pwsamplerthread::PWSamplerThread;
 use pwsampler::PWSampler;
+use pwsamplerdocker::PWSamplerDocker;
 use pwdata::{PWSampleProc, PWSetupProc};
+use tokio::task::LocalSet;
 use std::include_bytes;
 use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
+use tokio::runtime::Runtime;
+use tokio::io::Interest;
+use tokio::net::UnixStream;
+use awc::{ClientBuilder, Connector, SendClientRequest, ClientResponse, Client, ResponseBody};
+use crate::pwudsconnector::UdsConnector;
+
 mod pwsamplerthread;
+mod pwsamplerdocker;
 mod pwsamplerproc;
 mod pwsampler;
 mod pwreader;
 mod pwdata;
+mod pwudsconnector;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -97,28 +114,41 @@ async fn get_web(filename: web::Path<String>) -> HttpResponse {
 /// Entry point.
 ///
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() {
     env_logger::init();
 
-    let cli = Cli::parse();
-
-    const VERSION: &str = env!("CARGO_PKG_VERSION");
-    log::info!("Version {}", VERSION);
-
-    let sampler = Arc::new(Mutex::new(PWSamplerProc::new(cli.pid)));
-    let mut sampler_thread = PWSamplerThread::<PWSampleProc, PWSetupProc>::new(
-        sampler.clone()
-    );
-    sampler_thread.start();
-
-    HttpServer::new(move || {
-        App::new()
-            .app_data(web::Data::new(sampler.clone()))
-            .service(get_samples)
-            .service(get_setup)
-            .service(get_web)
-    })
-    .bind(("0.0.0.0", cli.port))?
-    .run()
-    .await
+    std::thread::spawn(move || {
+        use tokio::runtime::Runtime;
+        let local = LocalSet::new();
+        let rt = Runtime::new().unwrap();
+        local.spawn_local(async move {
+            let socket_path = Path::new("/var/run/docker.sock");
+            let connector = Connector::new().connector(UdsConnector::new(socket_path));
+            let client = ClientBuilder::new().connector(connector).finish();
+            let data = client.get("http://localhost/version")
+            .send()
+            .await
+            .unwrap()
+            .body()
+            .await
+            .unwrap();
+            log::warn!("Data: {:?}", data);
+        });
+        
+        
+        rt.block_on(local);
+    }).join();
 }
+
+/*#[actix_web::main]
+async fn main() {
+    let client = ClientBuilder::new().finish();
+    let data = client.get("https://bugfreeblog.duckdns.org")
+        .send()
+        .await
+        .unwrap()
+        .body()
+        .await
+        .unwrap();
+    log::warn!("Data: {:?}", data);
+}*/
