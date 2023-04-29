@@ -1,5 +1,3 @@
-use actix_web::Error;
-use awc::error::SendRequestError;
 /**
  * Copyright (C) 2023 Luca Carlon. All rights reserved.
  * 
@@ -19,9 +17,8 @@ use awc::error::SendRequestError;
 
 use serde::{Deserialize, Serialize};
 use tokio::runtime::Runtime;
-use tokio::io::Interest;
-use tokio::net::UnixStream;
-use awc::{ClientBuilder, Connector, SendClientRequest, ClientResponse, Client, ResponseBody};
+use tokio::task::LocalSet;
+use awc::{ClientBuilder, Connector};
 use std::sync::{Arc, Mutex};
 use std::path::Path;
 use crate::pwudsconnector::UdsConnector;
@@ -55,37 +52,28 @@ impl PWSamplerDocker {
     }
 }
 
-enum MyError {
-    SendRequestError,
-    PayloadError
-}
-
 impl PWSampler<PWSampleDocker, PWSetupDocker> for PWSamplerDocker {
     fn sample(&mut self) -> Option<PWSampleDocker> {
-        /*let rt  = Runtime::new().unwrap();
-        rt.block_on(async {
-            let socket_path = Path::new("/var/run/docker.sock");
-        let connector = Connector::new().connector(UdsConnector::new(socket_path));
-        let client = ClientBuilder::new().connector(connector).finish();
-            let data = client.get("http://localhost/version")
+        std::thread::spawn(move || {
+            let local = LocalSet::new();
+            let rt = Runtime::new().unwrap();
+            local.spawn_local(async move {
+                let socket_path = Path::new("/var/run/docker.sock");
+                let connector = Connector::new().connector(UdsConnector::new(socket_path));
+                let client = ClientBuilder::new().connector(connector).finish();
+                let data = client.get("http://localhost/version")
                 .send()
                 .await
                 .unwrap()
                 .body()
                 .await
                 .unwrap();
-            log::warn!("Data: {:?}", data);
-        });*/
-
-        /*let rt  = Runtime::new().unwrap();
-        let stream = match rt.block_on(UnixStream::connect(Path::new("/var/run/docker.sock"))) {
-            Err(e) => {
-                log::warn!("Error occurred trying to connect to docker socket: {:?}", e);
-                return None;
-            },
-            Ok(v) => v
-        };*/
-        
+                log::warn!("Data: {:?}", data);
+            });
+            
+            
+            rt.block_on(local);
+        }).join();
 
         Some(PWSampleDocker {
 

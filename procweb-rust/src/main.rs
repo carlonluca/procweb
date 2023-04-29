@@ -1,5 +1,3 @@
-use core::borrow;
-use std::path::Path;
 /**
  * Copyright (C) 2023 Luca Carlon. All rights reserved.
  * 
@@ -37,7 +35,6 @@ use pwsamplerthread::PWSamplerThread;
 use pwsampler::PWSampler;
 use pwsamplerdocker::PWSamplerDocker;
 use pwdata::{PWSampleProc, PWSetupProc};
-use tokio::task::LocalSet;
 use std::include_bytes;
 use std::collections::HashMap;
 
@@ -114,41 +111,34 @@ async fn get_web(filename: web::Path<String>) -> HttpResponse {
 /// Entry point.
 ///
 #[actix_web::main]
-async fn main() {
+async fn main() -> std::io::Result<()> {
     env_logger::init();
 
-    std::thread::spawn(move || {
-        use tokio::runtime::Runtime;
-        let local = LocalSet::new();
-        let rt = Runtime::new().unwrap();
-        local.spawn_local(async move {
-            let socket_path = Path::new("/var/run/docker.sock");
-            let connector = Connector::new().connector(UdsConnector::new(socket_path));
-            let client = ClientBuilder::new().connector(connector).finish();
-            let data = client.get("http://localhost/version")
-            .send()
-            .await
-            .unwrap()
-            .body()
-            .await
-            .unwrap();
-            log::warn!("Data: {:?}", data);
-        });
-        
-        
-        rt.block_on(local);
-    }).join();
-}
+    let cli = Cli::parse();
 
-/*#[actix_web::main]
-async fn main() {
-    let client = ClientBuilder::new().finish();
-    let data = client.get("https://bugfreeblog.duckdns.org")
-        .send()
-        .await
-        .unwrap()
-        .body()
-        .await
-        .unwrap();
-    log::warn!("Data: {:?}", data);
-}*/
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
+    log::info!("Version {}", VERSION);
+
+    let sampler = Arc::new(Mutex::new(PWSamplerProc::new(cli.pid)));
+    let mut sampler_thread = PWSamplerThread::<PWSampleProc, PWSetupProc>::new(
+        sampler.clone()
+    );
+    sampler_thread.start();
+
+    let sampler_docker = Arc::new(Mutex::new(PWSamplerDocker::new()));
+    let mut sampler_thread_docker = PWSamplerThread::<PWSampleDocker, PWSetupDocker>::new(
+        sampler_docker.clone()
+    );
+    sampler_thread_docker.start();
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(web::Data::new(sampler.clone()))
+            .service(get_samples)
+            .service(get_setup)
+            .service(get_web)
+    })
+    .bind(("0.0.0.0", cli.port))?
+    .run()
+    .await
+}
