@@ -27,7 +27,6 @@ use actix_web::{
     Responder,
     HttpResponse
 };
-use futures::executor::block_on;
 use pwsamplerdocker::PWSampleDocker;
 use pwsamplerdocker::PWSetupDocker;
 use pwsamplerproc::PWSamplerProc;
@@ -37,13 +36,6 @@ use pwsamplerdocker::PWSamplerDocker;
 use pwdata::{PWSampleProc, PWSetupProc};
 use std::include_bytes;
 use std::collections::HashMap;
-
-use serde::{Deserialize, Serialize};
-use tokio::runtime::Runtime;
-use tokio::io::Interest;
-use tokio::net::UnixStream;
-use awc::{ClientBuilder, Connector, SendClientRequest, ClientResponse, Client, ResponseBody};
-use crate::pwudsconnector::UdsConnector;
 
 mod pwsamplerthread;
 mod pwsamplerdocker;
@@ -62,7 +54,7 @@ struct Cli {
     port: u16
 }
 
-#[get("/api/samples")]
+#[get("/api/proc/samples")]
 async fn get_samples(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Responder {
     let samples = data.lock().unwrap().samples();
     let _samples = samples.lock().unwrap();
@@ -70,7 +62,7 @@ async fn get_samples(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Respond
     web::Json(__samples.clone())
 }
 
-#[get("/api/setup")]
+#[get("/api/proc/setup")]
 async fn get_setup(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Responder {
     web::Json(data.lock().unwrap().setup().clone())
 }

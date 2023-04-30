@@ -16,9 +16,11 @@
  */
 
 use serde::{Deserialize, Serialize};
+use serde_json;
 use tokio::runtime::Runtime;
 use tokio::task::LocalSet;
 use awc::{ClientBuilder, Connector};
+use std::str::from_utf8;
 use std::sync::{Arc, Mutex};
 use std::path::Path;
 use crate::pwudsconnector::UdsConnector;
@@ -27,17 +29,32 @@ use crate::PWSampler;
 #[derive(Serialize, Deserialize)]
 #[derive(Debug)]
 #[derive(Clone)]
+pub struct PWSampleDockerContainer {
+    pub id: String,
+    pub name: String,
+    pub image: String,
+    pub cpu: f64
+}
+
+#[derive(Serialize, Deserialize)]
+#[derive(Debug)]
+#[derive(Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PWSampleDocker {
-
-} 
+    pub containers: Vec<PWSampleDockerContainer>
+}
 
 #[derive(Serialize, Deserialize)]
 #[derive(Debug)]
 #[derive(Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PWSetupDocker {
+}
 
+#[derive(Serialize, Deserialize)]
+pub struct PWDockerContainer {
+    pub Id: String,
+    pub Names: Vec<String>
 }
 
 pub struct PWSamplerDocker {
@@ -54,29 +71,43 @@ impl PWSamplerDocker {
 
 impl PWSampler<PWSampleDocker, PWSetupDocker> for PWSamplerDocker {
     fn sample(&mut self) -> Option<PWSampleDocker> {
-        std::thread::spawn(move || {
-            let local = LocalSet::new();
-            let rt = Runtime::new().unwrap();
-            local.spawn_local(async move {
-                let socket_path = Path::new("/var/run/docker.sock");
-                let connector = Connector::new().connector(UdsConnector::new(socket_path));
-                let client = ClientBuilder::new().connector(connector).finish();
-                let data = client.get("http://localhost/version")
+        let local = LocalSet::new();
+        let rt = Runtime::new().unwrap();
+        let join = local.spawn_local(async move {
+            let socket_path = Path::new("/var/run/docker.sock");
+            let connector = Connector::new().connector(UdsConnector::new(socket_path));
+            let client = ClientBuilder::new().connector(connector).finish();
+            let data = client.get("http://localhost/containers/json?all=true")
                 .send()
                 .await
                 .unwrap()
                 .body()
                 .await
                 .unwrap();
-                log::warn!("Data: {:?}", data);
+            let containers: Vec<PWDockerContainer> = serde_json::from_str(from_utf8(&data).unwrap()).unwrap();
+            log::warn!("Containers: {:?}", containers.len());
+            containers
+        });
+        
+        let containers = match rt.block_on(join) {
+            Err(_) => {
+                return None;
+            },
+            Ok(v) => v
+        };
+
+        let mut containers_sample = Vec::<PWSampleDockerContainer>::new();
+        for container in containers {
+            containers_sample.push(PWSampleDockerContainer {
+                id: container.Id,
+                name: String::new(),
+                image: String::new(),
+                cpu: 0f64
             });
-            
-            
-            rt.block_on(local);
-        }).join();
+        }
 
         Some(PWSampleDocker {
-
+            containers: containers_sample
         })
     }
 
