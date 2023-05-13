@@ -27,17 +27,24 @@ use actix_web::{
     Responder,
     HttpResponse
 };
+use pwsamplerdocker::PWSampleDocker;
+use pwsamplerdocker::PWSetupDocker;
 use pwsamplerproc::PWSamplerProc;
 use pwsamplerthread::PWSamplerThread;
 use pwsampler::PWSampler;
+use pwsamplerdocker::PWSamplerDocker;
 use pwdata::{PWSampleProc, PWSetupProc};
+use core::fmt::Debug;
 use std::include_bytes;
 use std::collections::HashMap;
+
 mod pwsamplerthread;
+mod pwsamplerdocker;
 mod pwsamplerproc;
 mod pwsampler;
 mod pwreader;
 mod pwdata;
+mod pwudsconnector;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -48,15 +55,28 @@ struct Cli {
     port: u16
 }
 
-#[get("/api/samples")]
-async fn get_samples(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Responder {
-    let samples = data.lock().unwrap().samples();
+struct PWWebData {
+    pub sampler_proc: Arc<Mutex<PWSamplerProc>>,
+    pub sampler_docker: Arc<Mutex<PWSamplerDocker>>
+}
+
+#[get("/api/proc/samples")]
+async fn get_proc_samples(data: web::Data<PWWebData>) -> impl Responder {
+    let samples = data.sampler_proc.lock().unwrap().samples();
     let _samples = samples.lock().unwrap();
     let __samples = &*_samples;
     web::Json(__samples.clone())
 }
 
-#[get("/api/setup")]
+#[get("/api/docker/samples")]
+async fn get_docker_samples(data: web::Data<PWWebData>) -> impl Responder {
+    let samples = data.sampler_docker.lock().unwrap().samples();
+    let _samples = samples.lock().unwrap();
+    let __samples = &*_samples;
+    web::Json(__samples.clone())
+}
+
+#[get("/api/proc/setup")]
 async fn get_setup(data: web::Data<Arc<Mutex<PWSamplerProc>>>) -> impl Responder {
     web::Json(data.lock().unwrap().setup().clone())
 }
@@ -111,10 +131,21 @@ async fn main() -> std::io::Result<()> {
     );
     sampler_thread.start();
 
+    let sampler_docker = Arc::new(Mutex::new(PWSamplerDocker::new()));
+    let mut sampler_thread_docker = PWSamplerThread::<PWSampleDocker, PWSetupDocker>::new(
+        sampler_docker.clone()
+    );
+    sampler_thread_docker.start();
+
     HttpServer::new(move || {
+        let samplers = PWWebData {
+            sampler_proc: sampler.clone(),
+            sampler_docker: sampler_docker.clone()
+        };
         App::new()
-            .app_data(web::Data::new(sampler.clone()))
-            .service(get_samples)
+            .app_data(web::Data::new(samplers))
+            .service(get_proc_samples)
+            .service(get_docker_samples)
             .service(get_setup)
             .service(get_web)
     })

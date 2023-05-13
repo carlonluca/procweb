@@ -77,7 +77,7 @@ export class SamplesService {
     }
 
     requestClearSamples() {
-        this.http.delete("/api/samples").subscribe()
+        this.http.delete("/api/proc/samples").subscribe()
     }
 
     private getSetup() {
@@ -93,7 +93,7 @@ export class SamplesService {
     }
 
     private getSamples() {
-        return this.http.get<Sample[]>("/api/samples")
+        return this.http.get<Sample[]>("/api/proc/samples")
     }
 
     private refreshSamples(observer: Observer<Sample[]>) {
