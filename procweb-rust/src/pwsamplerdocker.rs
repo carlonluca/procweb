@@ -77,6 +77,10 @@ impl PWSampler<PWSampleDocker, PWSetupDocker> for PWSamplerDocker {
             //let containers = Arc::<Vec<PWDockerContainer>>::new();
             let containers = local.block_on(&rt, async move {
                 let socket_path = Path::new("/var/run/docker.sock");
+                if !socket_path.exists() {
+                    return None;
+                }
+
                 let connector = Connector::new().connector(UdsConnector::new(socket_path));
                 let client = ClientBuilder::new().connector(connector).finish();
                 let data = client.get("http://localhost/containers/json?all=true")
@@ -87,10 +91,10 @@ impl PWSampler<PWSampleDocker, PWSetupDocker> for PWSamplerDocker {
                     .await
                     .unwrap();
                 let containers: Vec<PWDockerContainer> = serde_json::from_str(from_utf8(&data).unwrap()).unwrap();
-                containers
+                Some(containers)
             });
 
-            Some(containers)
+            containers
         }).join() {
             Err(_) => return None,
             Ok(v) => match v {
