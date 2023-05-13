@@ -19,6 +19,8 @@ Some of these values can be used to draw a chart. Procweb provides a web interfa
 
 Procweb can be used to monitor a process for memory leaks or unexpected behavior during many hours or days of work.
 
+*NOTE: the version in the root of the repo is based on Qt. At the moment, I'm focusing more on the Rust version, which can be found in the procweb-rust directory in this repo.*
+
 ## Details
 
 Procweb is a C++ process that can be run in background. It depends on Qt >= 6.4. The process provides a web interface written in TypeScript with Angular which represents data in time. Procweb stores samples without expiration, so it is possible to inspect old data. The web interface can be accessed at http://<ip_addr>:3000.
