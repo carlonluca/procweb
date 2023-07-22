@@ -24,6 +24,12 @@
  */
  -->
 
+<mat-toolbar>
+    <mat-toolbar-row>
+        <span class="span">Procweb UI</span>
+    </mat-toolbar-row>
+</mat-toolbar>
+
 <section class="mat-typography page-element">
     <br/>
     <div class="center-container">Recording time: {{ sampledTime }}</div>
@@ -118,3 +124,12 @@
 
     <br/>
 </section>
+
+<footer class="mat-toolbar">
+    <p>
+        Working time: {{ humanizeTime(generatedElapsed) }}<br/>
+        Page generated: {{ generatedTime }}<br/>
+        Copyright (©) 2022 - 2023 Luca Carlon<br/>
+        GPLv3
+    </p>
+</footer>

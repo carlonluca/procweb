@@ -39,6 +39,7 @@ import { MatButtonModule } from '@angular/material/button'
 import { MatDialogModule } from '@angular/material/dialog'
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DialogYesNoComponent } from './dialog-yes-no/dialog-yes-no.component'
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 @NgModule({
    declarations: [
@@ -59,6 +60,7 @@ import { DialogYesNoComponent } from './dialog-yes-no/dialog-yes-no.component'
       MatTableModule,
       MatButtonModule,
       MatDialogModule,
+      MatToolbarModule,
       FontAwesomeModule,
       NgxEchartsModule.forRoot({
          /**

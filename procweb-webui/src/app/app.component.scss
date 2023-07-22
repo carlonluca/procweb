@@ -21,6 +21,29 @@
 /// Company: -
 ///
 
+footer {
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    color: white;
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: normal !important;
+    padding-top: 1.5em;
+    padding-bottom: 1.5em;
+    margin-top: 0em;
+    margin-bottom: 0em;
+    line-height: 1.8em;
+}
+
+footer p {
+    margin-bottom: 0;
+}
+
+.span {
+    margin: auto;
+}
+
 .demo-chart {
     height: 400px;
 }
