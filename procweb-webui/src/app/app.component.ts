@@ -31,6 +31,7 @@ import { Setup, Sample, SamplesService, TimeUom } from './samples.service'
 import { DialogYesNoComponent } from './dialog-yes-no/dialog-yes-no.component'
 import { saveAs } from 'file-saver'
 import { MatDialog } from '@angular/material/dialog'
+import { interval } from 'rxjs';
 import * as csv from 'csv-writer/web'
 import prettyBytes from 'pretty-bytes'
 
@@ -136,9 +137,16 @@ export class AppComponent {
 
     chartInstance: any = null
 
+    generatedTime: Date = new Date()
+    generatedElapsed: number = 0
+
     constructor(private sampleService: SamplesService, public dialog: MatDialog) { }
 
     ngOnInit() {
+        interval(1000).subscribe((_) => {
+            this.generatedElapsed = Math.floor((new Date().getTime() - this.generatedTime.getTime())/1000)*1000
+        })
+
         this.sampleService.setup.subscribe((data: Setup) => {
             if (!data)
                 return
@@ -350,5 +358,11 @@ export class AppComponent {
 
     onChartInit(ec: any) {
         this.chartInstance = ec
+    }
+
+    humanizeTime(elapsed: number): string {
+        let langService = new HumanizeDurationLanguage()
+        let humanizer = new HumanizeDuration(langService)
+        return humanizer.humanize(elapsed)
     }
 }
