@@ -53,6 +53,7 @@ struct Cli {
     /// TCP port of the HTTP server
     #[arg(short, long, default_value_t = 3000)]
     port: u16,
+    /// Sampling interval in ms (webapp refresh interval won't change)
     #[arg(short, long, default_value_t = 1000)]
     sampms: u64
 }
