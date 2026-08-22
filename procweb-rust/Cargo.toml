@@ -7,7 +7,7 @@ description = "A binary providing a web interface to monitor the resources used 
 homepage = "https://bugfreeblog.duckdns.org/"
 readme = "README.md"
 keywords = ["monitor", "process"]
-categories = ["Command line utilities", "Development tools", "Embedded development"]
+categories = ["command-line-utilities", "development-tools", "embedded"]
 
 [dependencies]
 log = "0.4.0"
