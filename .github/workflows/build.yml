@@ -30,8 +30,3 @@ jobs:
                 mkdir -p AppDir/usr/share/icons
                 touch AppDir/usr/share/icons/test.png
                 appimage-builder --recipe ../../appimage-builder/AppImageBuilder_x64.yml
-          - name: "Archive AppImage"
-            uses: actions/upload-artifact@v2
-            with:
-              name: "AppImage"
-              path: procweb-qt/build/procweb-1.0.0-x86_64.AppImage
