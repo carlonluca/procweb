@@ -52,7 +52,9 @@ struct Cli {
     pid: i64,
     /// TCP port of the HTTP server
     #[arg(short, long, default_value_t = 3000)]
-    port: u16
+    port: u16,
+    #[arg(short, long, default_value_t = 1000)]
+    sampms: u64
 }
 
 struct PWWebData {
@@ -129,12 +131,14 @@ async fn main() -> std::io::Result<()> {
     let mut sampler_thread = PWSamplerThread::<PWSampleProc, PWSetupProc>::new(
         sampler.clone()
     );
+    sampler_thread.set_sampling_interval(std::time::Duration::from_millis(cli.sampms));
     sampler_thread.start();
 
     let sampler_docker = Arc::new(Mutex::new(PWSamplerDocker::new()));
     let mut sampler_thread_docker = PWSamplerThread::<PWSampleDocker, PWSetupDocker>::new(
         sampler_docker.clone()
     );
+    sampler_thread_docker.set_sampling_interval(std::time::Duration::from_millis(cli.sampms));
     sampler_thread_docker.start();
 
     HttpServer::new(move || {
