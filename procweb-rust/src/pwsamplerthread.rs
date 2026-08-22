@@ -28,7 +28,8 @@ use crate::pwsampler::PWSampler;
 pub struct PWSamplerThread<T: 'static, ST: 'static> {
     thread_handle: Option<JoinHandle<()>>,
     running: Arc<AtomicBool>,
-    sampler: Arc<Mutex<dyn PWSampler<T, ST>>>
+    sampler: Arc<Mutex<dyn PWSampler<T, ST>>>,
+    sampling_interval: Duration
 }
 
 impl<T: Debug, ST: Debug> PWSamplerThread<T, ST> {
@@ -39,8 +40,13 @@ impl<T: Debug, ST: Debug> PWSamplerThread<T, ST> {
         PWSamplerThread::<T, ST> {
             thread_handle: None,
             running: Arc::new(AtomicBool::new(true)),
-            sampler: sampler
+            sampler: sampler,
+            sampling_interval: Duration::from_secs(1)
         }
+    }
+
+    pub fn set_sampling_interval(&mut self, interval: Duration) {
+        self.sampling_interval = interval;
     }
 
     ///
@@ -50,6 +56,7 @@ impl<T: Debug, ST: Debug> PWSamplerThread<T, ST> {
         if self.thread_handle.is_none() {
             let sampler = self.sampler.clone();
             let running = Arc::new(AtomicBool::new(true));
+            let sampling_interval = self.sampling_interval.clone();
             let thread_handle = thread::spawn({
                 let running = running.clone();
                 move || {
@@ -59,8 +66,7 @@ impl<T: Debug, ST: Debug> PWSamplerThread<T, ST> {
                             let sample = sampler.sample();
                             log::info!("Sample acquired: {:?}", sample);
                         }
-                        
-                        sleep(Duration::from_secs(1));
+                        sleep(sampling_interval);
                     }
                 }
             });
