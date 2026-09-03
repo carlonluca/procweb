@@ -1,5 +1,5 @@
 # Procweb
-Procweb is a process that can be run to monitor another process. Procweb runs and samples the process periodically retrieving these values:
+Procweb is a process that can be run to monitor another process in Linux systems. Procweb runs and samples the process periodically retrieving these values:
 
 * State;
 * CPU usage;
@@ -15,42 +15,35 @@ Procweb is a process that can be run to monitor another process. Procweb runs an
 * Uptime;
 * Start time.
 
-Some of these values can be used to draw a chart. Procweb provides a web interface to display data.
+Some of these values can be used to draw a chart through the web interface provided by procweb.
 
 Procweb can be used to monitor a process for memory leaks or unexpected behavior during many hours or days of work.
 
-*NOTE: the version in the root of the repo is based on Qt. At the moment, I'm focusing more on the Rust version, which can be found in the procweb-rust directory in this repo.*
-
 ## Details
 
-Procweb is a C++ process that can be run in background. It depends on Qt >= 6.4. The process provides a web interface written in TypeScript with Angular which represents data in time. Procweb stores samples without expiration, so it is possible to inspect old data. The web interface can be accessed at http://<ip_addr>:3000.
+Procweb is a Rust-written process that can be run in background. The process provides a web interface written in TypeScript with Angular which represents data in time. Procweb stores samples without expiration, so it is possible to inspect old data. The web interface can be accessed at http://<ip_addr>:3000.
 
-## Installation
+## Usage
 
-Procweb includes a AppImage that can be run, without having to install any dependency. At the moment it only works on x64.
-
-## Demo
-
-Here is an example of how procweb can monitor data and present it through the browser.
-
-<p align="center">
-<img width="70%" src="docs/screenshot.webp">
-</p>
-
-## Build
-
-The project includes two modules: one is the angular webapp, the other is the Qt process running as a server and sampling the process. First, you'll need to build the angular application. The angular app is then embedded into the procweb executable:
+To use the crate, simply install it and run by passing the PID of a running process to monitor:
 
 ```
-cd procweb-webui
-./build.sh
+cargo install procweb-rust
+procweb-rust 1234
 ```
 
-then you'll be able to build the Qt binary:
+Then open a browser and go to:
 
 ```
-mkdir build
-cd build
-cmake ..
-make
+http://<ip-addr>:3000/
 ```
+
+<img src="https://github.com/carlonluca/procweb/raw/master/docs/screenshot.webp" />
+
+## Static builds
+
+If you need to run procweb on a system that does not provide cargo, rustc etc... like embedded systems, or if you want to avoid the installation of many dependencies, you can simply download one of the static builds. In the release section you can download fully self-contained static binaries that can be run without any dependencies on x64, aarch64 or armv7 (only Linux is supported).
+
+## Qt version
+
+A version based on Qt is also available in [procweb-qt](procweb-qt). That version is, however, deprecated.
