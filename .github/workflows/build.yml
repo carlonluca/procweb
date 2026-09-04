@@ -30,3 +30,41 @@ jobs:
                 mkdir -p AppDir/usr/share/icons
                 touch AppDir/usr/share/icons/test.png
                 appimage-builder --recipe ../../appimage-builder/AppImageBuilder_x64.yml
+
+    build-rust:
+        runs-on: ubuntu-22.04
+        container:
+            image: carlonluca/procweb-ci-rust:resolute
+        steps:
+          - name: Install git on container
+            run: |
+                apt update
+                apt install -y git
+          - name: Checkout
+            uses: actions/checkout@v3
+            with:
+                submodules: recursive
+          - name: Build
+            shell: bash
+            run: |
+                export CROSS_CONTAINER_IN_CONTAINER=true
+                export HOSTNAME=$(docker ps -ql)
+                cd procweb-webui
+                ./build.sh
+                cd ..
+                cd procweb-rust
+                rm -f 386.js favicon.ico icon.svg index.html main.js polyfills.js runtime.js styles.css
+                cp ../procweb-webui/dist/procweb-webui/* .
+                cp ../icon.svg .
+                cargo install cross
+                cross build --release --target x86_64-unknown-linux-musl
+                mkdir -p ../procweb-dist/x86_64-unknown-linux-musl
+                mv target/x86_64-unknown-linux-musl/release/procweb-rust ../procweb-dist/x86_64-unknown-linux-musl/
+                cargo clean
+                cross build --release --target aarch64-unknown-linux-musl
+                mkdir -p ../procweb-dist/aarch64-unknown-linux-musl
+                mv target/aarch64-unknown-linux-musl/release/procweb-rust ../procweb-dist/aarch64-unknown-linux-musl/
+                cargo clean
+                cross build --release --target armv7-unknown-linux-musleabihf
+                mkdir -p ../procweb-dist/armv7-unknown-linux-musleabihf
+                mv target/armv7-unknown-linux-musleabihf/release/procweb-rust ../procweb-dist/armv7-unknown-linux-musleabihf/

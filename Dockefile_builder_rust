@@ -1,4 +1,19 @@
-FROM carlonluca/docker-multiarch:latest
+FROM ubuntu:resolute
+
+RUN \
+    apt-get update \
+ && apt-get install -y ca-certificates curl \
+ && install -m 0755 -d /etc/apt/keyrings \
+ && curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+    -o /etc/apt/keyrings/docker.asc \
+ && chmod a+r /etc/apt/keyrings/docker.asc \
+ && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+  https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+  > /etc/apt/sources.list.d/docker.list \
+ && apt-get update \
+ && apt-get install -y docker-ce-cli docker-buildx-plugin docker-compose-plugin
+
 RUN \
     apt-get update \
  && apt-get install -y curl \
@@ -9,9 +24,11 @@ RUN \
  && apt-get update \
  && apt-get install -y nodejs \
  && npm install -g @angular/cli \
- && curl https://sh.rustup.rs -sSf | bash -s -- --default-toolchain=1.67.0 -y \
- && apt-get install -y musl-dev musl-tools \
+ && curl https://sh.rustup.rs -sSf | bash -s -- -y \
  && apt-get clean autoclean \
  && apt-get -y autoremove \
  && rm -rf /var/lib/{apt,dpkg,cache,log}
+
+RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
+
 ENV PATH="/root/.cargo/bin:${PATH}"
