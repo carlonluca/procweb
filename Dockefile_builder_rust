@@ -20,7 +20,7 @@ RUN \
  && apt purge -y nodejs \
  && dpkg --remove --force-remove-reinstreq libnode-dev \
  && dpkg --remove --force-remove-reinstreq libnode72 \
- && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+ && curl -fsSL https://deb.nodesource.com/setup_26.x | bash - \
  && apt-get update \
  && apt-get install -y nodejs \
  && npm install -g @angular/cli \
