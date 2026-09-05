@@ -58,6 +58,7 @@ jobs:
                 cp ../icon.svg .
                 rustup default stable
                 cargo install cross
+                . "$HOME/.cargo/env"
                 cross build --release --target x86_64-unknown-linux-musl
                 mkdir -p ../procweb-dist/x86_64-unknown-linux-musl
                 mv target/x86_64-unknown-linux-musl/release/procweb-rust ../procweb-dist/x86_64-unknown-linux-musl/
