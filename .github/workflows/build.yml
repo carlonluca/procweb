@@ -56,6 +56,7 @@ jobs:
                 rm -f 386.js favicon.ico icon.svg index.html main.js polyfills.js runtime.js styles.css
                 cp ../procweb-webui/dist/procweb-webui/* .
                 cp ../icon.svg .
+                rustup default stable
                 cargo install cross
                 cross build --release --target x86_64-unknown-linux-musl
                 mkdir -p ../procweb-dist/x86_64-unknown-linux-musl
