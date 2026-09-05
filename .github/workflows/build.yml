@@ -81,7 +81,7 @@ jobs:
                 xz -9 -k aarch64-unknown-linux-musl/procweb-rust
                 xz -9 -k armv7-unknown-linux-musleabihf/procweb-rust
           - name: Upload artifacts
-            uses: actions/upload-artifact@v4
+            uses: actions/upload-artifact@v3
             with:
                 name: procweb-rust
                 path: |
