@@ -16,7 +16,7 @@ RUN \
 
 RUN \
     apt-get update \
- && apt-get install -y curl \
+ && apt-get install -y curl git \
  && apt purge -y nodejs \
  && dpkg --remove --force-remove-reinstreq libnode-dev \
  && dpkg --remove --force-remove-reinstreq libnode72 \
