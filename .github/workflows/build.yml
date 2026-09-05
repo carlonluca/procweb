@@ -68,3 +68,24 @@ jobs:
                 cross build --release --target armv7-unknown-linux-musleabihf
                 mkdir -p ../procweb-dist/armv7-unknown-linux-musleabihf
                 mv target/armv7-unknown-linux-musleabihf/release/procweb-rust ../procweb-dist/armv7-unknown-linux-musleabihf/
+          - name: Install xz
+            run: |
+                apt update
+                apt install -y xz-utils
+          - name: Compress artifacts
+            shell: bash
+            run: |
+                set -e
+                cd procweb-dist
+                xz -9 -k x86_64-unknown-linux-musl/procweb-rust
+                xz -9 -k aarch64-unknown-linux-musl/procweb-rust
+                xz -9 -k armv7-unknown-linux-musleabihf/procweb-rust
+          - name: Upload artifacts
+            uses: actions/upload-artifact@v4
+            with:
+                name: procweb-rust
+                path: |
+                    procweb-dist/x86_64-unknown-linux-musl/procweb-rust.xz
+                    procweb-dist/aarch64-unknown-linux-musl/procweb-rust.xz
+                    procweb-dist/armv7-unknown-linux-musleabihf/procweb-rust.xz
+                if-no-files-found: error
