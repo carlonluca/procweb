@@ -25,6 +25,7 @@ RUN \
  && apt-get install -y nodejs \
  && npm install -g @angular/cli \
  && curl https://sh.rustup.rs -sSf | bash -s -- -y \
+ && . "$HOME/.cargo/env" \
  && rustup default stable \
  && apt-get clean autoclean \
  && apt-get -y autoremove \
