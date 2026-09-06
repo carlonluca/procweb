@@ -58,7 +58,6 @@ jobs:
                 cp ../icon.svg .
                 rustup default stable
                 cargo install cross
-                . "/root/.cargo/env"
                 cross build --release --target x86_64-unknown-linux-musl
                 mkdir -p ../procweb-dist/x86_64-unknown-linux-musl
                 mv target/x86_64-unknown-linux-musl/release/procweb-rust ../procweb-dist/x86_64-unknown-linux-musl/
@@ -82,8 +81,8 @@ jobs:
                 xz -9 -k x86_64-unknown-linux-musl/procweb-rust
                 xz -9 -k aarch64-unknown-linux-musl/procweb-rust
                 xz -9 -k armv7-unknown-linux-musleabihf/procweb-rust
-          - name: Upload artifacts (GitHub)
-            uses: actions/upload-artifact@v4
+          - name: Upload artifacts (Forgejo)
+            uses: https://code.forgejo.org/forgejo/upload-artifact@v4
             with:
                 name: procweb-rust
                 path: procweb-dist/**/*.xz
